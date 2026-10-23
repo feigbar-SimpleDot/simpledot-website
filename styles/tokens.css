@@ -1,0 +1,175 @@
+/* ===== V5 tokens: V4 全量继承 (值逐字节未动) + V5 新增 14 token 双档 (UX-V5 §2) =====
+   对比度均经 WCAG 2.1 实算 (UX-V5 §2.2, 脚本存档可复跑); 裸色纪律: 全部色值集中在本片,
+   03~06 样式片只允许 var() 引用 (grep hex 审计口径见 IMPL-NOTES-V5 §4) */
+:root{
+  --bg-page:#fbf9f6;
+  --bg-warm:#f4efe8;
+  --bg-hero-grad:linear-gradient(165deg,#fdfcfa 0%,#f3eee6 55%,#ece9f7 100%);
+  --bg-dark:#211d19;
+  --bg-dark-2:#2b2621;
+  --bg-code:#262019;
+  --text-primary:#1c1a17;
+  --text-secondary:#5c554d;
+  --text-tertiary:#746c64;   /* P1-AA 修复: 亮档由 #8a8177(3.35:1 on warm) 同色相加深, 实算 4.51~4.91:1 */
+  --text-inverse:#f5f1ea;
+  --text-inverse-muted:#c9c0b4;
+  --accent:#4f46e5;
+  --accent-hover:#4338ca;
+  --accent-soft:#eef0fd;
+  --accent-on-dark:#a5b4fc;
+  --accent-warm:#b45309;
+  --border:#e7e0d6;
+  --border-strong:#cfc4b4;
+  --border-dark:#3a332c;
+  --success:#15803d;
+  --success-tint:#e7f3ea;
+  --warning:#92400e;
+  --warning-tint:#fdf2e3;
+  --danger:#b91c1c;
+  --danger-tint:#fdeaea;
+  /* ---- v3 品牌色 (仅 LOGO 图形与 favicon 使用, BRAND-V3 实算) ---- */
+  --brand-blue:#1E90FF;
+  --brand-dot:#1878D8;
+  --brand-dot-dark:#4DABF7;
+  --brand-ring:#343A40;
+  --brand-ring-dark:#8A93A0;
+  --code-text:#e8e2d8;
+  --code-accent:#d97706;
+  --code-comment:#9a8f80;
+  /* RV6-P2-3: copy-btn 裸色提 token — 代码块两主题恒深, 定义于 :root 且暗档块不覆盖 */
+  --copy-btn-border:rgba(255,255,255,.15);
+  --copy-btn-bg:rgba(255,255,255,.06);
+  --copy-btn-border-hover:rgba(255,255,255,.35);
+  --radius-sm:8px;
+  --radius-md:12px;
+  --radius-lg:16px;
+  --radius-xl:24px;
+  --radius-pill:999px;
+  --shadow-soft:0 1px 2px rgba(28,26,23,.04),0 4px 12px rgba(28,26,23,.06);
+  --shadow-lift:0 2px 4px rgba(28,26,23,.05),0 12px 32px rgba(28,26,23,.10);
+  --shadow-glow:0 8px 40px rgba(79,70,229,.12);
+  --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","Courier New",monospace;
+  /* ---- v4 语义 token (UX-V4 §2.3 亮档值, 原样继承) ---- */
+  --surface-card:#ffffff;
+  --on-accent:#ffffff;
+  --header-glass:rgba(251,249,246,.9);
+  --border-glass:rgba(245,241,234,.42);
+  --badge-neutral-bg:#ece5da;
+  --success-strong:#166534;
+  --ok-icon:#4ade80;
+  --callout-fg:#92400e;   /* P1-AA 修复: 亮档 .warn 由 #f5c583(1.41:1) 换 warning 深值, 实算 6.20~6.75:1 */
+  --shot-grad:linear-gradient(150deg,#f6f1e9 0%,#efe9e0 100%);
+  --shot-grad-band:linear-gradient(150deg,#2b2621 0%,#332c25 100%); /* 深色带专用, 两主题恒深 */
+  --shot-dot:#d8ccbb;
+  --shot-icon:#b9ac9b;
+  --shot-label:#6f6659;
+  --shot-caption-bg:rgba(255,255,255,.5);
+  --glow-accent:rgba(79,70,229,.14);
+  /* ---- V5 新增 14 token (UX-V5 §2.2 实算表, 亮档) ---- */
+  --shell-h:64px;                                   /* 壳条高 = V6 header 实占高: 64 桌面 / 56 <1024 (移动 104 档随 C6 废除) */
+  --shell-glass:rgba(251,249,246,.86);              /* 壳条毛玻璃底 */
+  --pill-track:rgba(28,26,23,.06);                  /* 胶囊导航轨道底 */
+  --pill-active-bg:#1c1a17;                         /* 当前项指示胶囊底 */
+  --pill-active-fg:#fbf9f6;                         /* 当前项文字 16.52:1 PASS */
+  --pill-idle-fg:#5c554d;                           /* 非当前项文字 6.20:1 PASS */
+  --pill-idle-fg-hover:#1c1a17;                     /* hover 文字 14.97:1 PASS */
+  --card-edge:rgba(28,26,23,.14);                   /* 卡面环境光描边 (装饰豁免 UX-V5 §2.3) */
+  --card-ghost-edge:rgba(28,26,23,.10);             /* 虚线残影 (装饰豁免) */
+  --star-1:110,122,150;                             /* 亮档主星点 slate (峰值 α .16, 星上正文 13.75:1) */
+  --star-2:180,83,9;                                /* 亮档点缀星 warm (峰值 α .10, 星上正文 14.46:1) */
+  --screen-bg-translucent:rgba(244,239,232,.88);    /* [V6 deprecated] 旧屏2/3满屏阅读底 (星空遮挡元凶, ST2-a 删除引用); token 定义保留, 新结构零引用 */
+  --scrim-band:rgba(251,249,246,.55);               /* V6 局部底带 (UX-V6 §6 ST2-b/§9): 只垫内容列, 四周星空直出; 星峰最坏点正文 15.24:1 PASS */
+  --menu-veil:rgba(28,26,23,.30);                   /* V6 移动菜单遮罩底 (header 汉堡焦点圈闭配套) */
+  --font-display:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif; /* 展示角色=无衬线同栈 (UX-V5 §10, 衬线有意空置) */
+  --stagger:40ms;                                   /* 屏切换交错级差 (n>5 屏兜底 32ms) */
+  /* ---- V5.1 光与纵深 7 token 双档 (UX-POLISH-V5.1 §6, WCAG 实算全 PASS) ---- */
+  --vignette:radial-gradient(ellipse 75% 65% at 50% 45%, transparent 55%, rgba(28,26,23,.05) 100%);
+  /* V5.4 阴影加浓 (TEST-V5.3: '卡堆扁平阴影淡'): 三档 α .05/.09/.16 → .14/.24/.38, 模糊同步加大 */
+  --card-shadow-1:0 3px 10px rgba(28,26,23,.14);    /* 后卡 */
+  --card-shadow-2:0 8px 20px rgba(28,26,23,.24);    /* 中卡 */
+  --card-shadow-3:0 18px 44px rgba(28,26,23,.38);   /* 顶卡 */
+  --card-shadow-lift:0 26px 56px rgba(28,26,23,.30);  /* hover 抬升态: 影扩散 56px 且 α 略降 (§3.4) */
+  --card-rim:inset 0 1px 0 rgba(255,255,255,.9);    /* 亮档=纸面受光顶缘高光, 无外发光 */
+  --card-ambient:rgba(28,26,23,.10);                /* 主卡地影 (暖) */
+  --star-glow-1:110,122,150;                        /* 亮星晕色 = star-1 同值 */
+  --star-glow-2:110,122,150;                        /* V5.4 明星外晕扩散色 (slate) */
+  --stack-glow:rgba(79,70,229,.07);                 /* V5.4 卡堆后环境辉光 (亮档保守, 投影塑形哲学) */
+  /* ---- V7 屏2 新增 3 token (UX-V7 §7.1; 走 token 双档, 散裸色=0) ---- */
+  --sc-border-grad:linear-gradient(115deg,#b8506c 0%,#9c6212 48%,#2e7fa6 100%); /* 大卡 2px 渐变描边 (粉→黄→青, 亮档压深档) */
+  --sc-tilt:-2.5deg;                                 /* 屏2 面板倾角 (<768 覆盖 -1.5deg) */
+  --rail-y:0px;                                      /* 右栏高亮条 translateY 偏移 (JS 写, 600ms 缓动) */
+}
+/* ===== V5 暗档覆盖 (UX-V4 §2.2 继承 + UX-V5 §2.2 新增暗值, 全部实算 PASS) ===== */
+:root[data-theme="dark"]{
+  --bg-page:#0f0e10;   /* V5.3: 暖棕#14110e→深中性黑, 与星空冷调协调不割裂; 全部暗档文字对比度对新底复算全 PASS (见 FIX-NOTES-V5.3 §3) */
+  --bg-warm:#1c1815;
+  --bg-hero-grad:linear-gradient(165deg,#191612 0%,#1b1917 55%,#1a1a24 100%);
+  --bg-dark:#1f1b17;
+  --bg-dark-2:#272119;
+  --bg-code:#1a1611;
+  --text-primary:#f4efe6;
+  --text-secondary:#c6bdb0;
+  --text-tertiary:#9a9083;
+  --accent:#a5b4fc;
+  --accent-hover:#c7d2fe;
+  --accent-soft:#262647;
+  --accent-warm:#f2a35c;
+  --border:#332c25;
+  --border-strong:#7a6853;
+  --border-dark:#3f382f;
+  --success:#5dd48c;
+  --success-tint:#1d2b22;
+  --warning:#f5c583;
+  --warning-tint:#342812;
+  --danger:#f87171;
+  --danger-tint:#341a1a;
+  --code-accent:#f0a24a;
+  --code-comment:#a89c8c;
+  /* 品牌色暗覆盖: light-variant LOGO 在暗主题自动取亮环亮点 (UX-V4 §7) */
+  --brand-ring:#8A93A0;
+  --brand-dot:#4DABF7;
+  /* v4 新增 token 暗档值 */
+  --surface-card:#221d18;
+  --on-accent:#14110e;
+  --header-glass:rgba(20,17,14,.88);
+  --badge-neutral-bg:#2e2822;
+  --success-strong:#5dd48c;
+  --callout-fg:#f5c583;
+  --shot-grad:linear-gradient(150deg,#262119 0%,#2e2820 100%);
+  --shot-dot:#4a423a;
+  --shot-icon:#6b6154;
+  --shot-label:#c9c0b4;
+  --shot-caption-bg:rgba(0,0,0,.25);
+  --glow-accent:rgba(165,180,252,.16);
+  /* V5 新增 token 暗档值 */
+  --shell-glass:rgba(20,17,14,.82);
+  --pill-track:rgba(245,241,234,.08);
+  --pill-active-bg:#f4efe6;
+  --pill-active-fg:#14110e;                         /* 16.43:1 PASS */
+  --pill-idle-fg:#c6bdb0;                           /* 8.42:1 PASS */
+  --pill-idle-fg-hover:#f4efe6;                     /* 12.14:1 PASS */
+  --card-edge:rgba(245,241,234,.18);                /* 装饰豁免 */
+  --card-ghost-edge:rgba(245,241,234,.12);          /* 装饰豁免 */
+  --star-1:244,239,230;                             /* 暗档暖白星 (峰值 α .22, 星上正文 8.73:1) */
+  --star-2:165,180,252;                             /* 暗档点缀星 =accent (峰值 α .22, 星上正文 10.59:1) */
+  --screen-bg-translucent:rgba(28,24,21,.88);       /* [V6 deprecated] 同亮档: 保留定义, 新结构零引用 */
+  --scrim-band:rgba(15,14,16,.45);                  /* V6 局部底带暗档 (UX-V6 §9): 星峰最坏点正文 12.60:1 PASS */
+  --menu-veil:rgba(0,0,0,.5);                       /* V6 移动菜单遮罩底 (暗档) */
+  /* V5.1 光与纵深 暗档值 (暗=发光塑形: 深黑压角 / rim 暖白 / accent 辉光) */
+  --vignette:radial-gradient(ellipse 75% 65% at 50% 45%, transparent 50%, rgba(0,0,0,.45) 100%);
+  --card-shadow-1:0 3px 12px rgba(0,0,0,.42);
+  --card-shadow-2:0 10px 26px rgba(0,0,0,.58);
+  --card-shadow-3:0 20px 52px rgba(0,0,0,.72),0 0 32px rgba(165,180,252,.14);  /* 顶卡: 黑压 + accent 外发光 (§3.3, V5.4 加强) */
+  --card-shadow-lift:0 28px 60px rgba(0,0,0,.60);  /* hover 抬升态 (§3.4/§7 双伪元素交叉淡入, V5.4 加深) */
+  --card-rim:inset 0 1px 0 rgba(245,241,234,.55), inset 1px 0 0 rgba(245,241,234,.25);  /* V5.4 rim α0.5++ (暗=发光塑形, 1px 缘高光不涉正文 AA) */
+  --card-ambient:rgba(165,180,252,.14);             /* 主卡 accent 辉光 */
+  --star-glow-1:244,239,230;                        /* 暗档亮星晕色 = 暖白 */
+  --star-glow-2:110,122,150;                        /* V5.4 明星外晕扩散色 (slate, 文字交叠区 AA 实算档) */
+  --stack-glow:rgba(165,180,252,.15);               /* V5.4 卡堆后环境辉光 (accent 径向, 卡区间上沿; 落底 AA: primary 12.9 / secondary 8.0 / tertiary 4.7 全 PASS) */
+  /* ---- V7 屏2 token 暗档值 (与亮档同几何, 描边三色整体提亮但 vs page ≥4.25/对星峰 ≥3.9 全 PASS) ---- */
+  --sc-border-grad:linear-gradient(115deg,#ff8fa3 0%,#ffd9a0 48%,#9fe8ff 100%); /* 暗档渐变提亮一档 */
+}
+html.i18n-pending [data-i18n]{visibility:hidden;}
+/* 无 JS: canvas 不显示, 防空白占位 (UX-V5 降级三件套之一) */
+html:not(.js) canvas{display:none;}

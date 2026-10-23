@@ -1,0 +1,122 @@
+/* ===== 任务卡堆 M2 + V5.1 真3D (UX-POLISH-V5.1 §3/§4): 扇形几何 + Z轴深度 + 光影 =====
+   几何唯一源: transform-origin 50% 120% (容器中心下移制造扇弧); 槽位旋转/位移由 [data-slot] 定义,
+   JS 翻牌只改 slot 归属, 落位动画由 transition 承担 (spring cubic-bezier(.34,1.34,.64,1))
+   V5.1 分层 (决策5: rock 与 tilt 用 DOM 分层解 transform 冲突, rock 参数不动):
+   .cardstack(rock) > .cardstack-3d(perspective:1000) > .cardstack-tilt(rotateX 8°) > 卡 */
+.cardstack-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;position:relative;}
+/* V5.4 环境辉光: 卡堆后 accent 径向光晕 (半径 600px 按卡要求, 卡缘外可见; 纯装饰零交互, 落底 AA 全 PASS) */
+.cardstack-wrap::before{content:"";position:absolute;left:50%;top:50%;width:1200px;height:1200px;
+  transform:translate(-50%,-50%);pointer-events:none;
+  background:radial-gradient(circle closest-side,var(--stack-glow) 30%,transparent 100%);}
+.cardstack{position:relative;width:340px;height:250px;
+  animation:rock 7s ease-in-out infinite alternate;}               /* M5 微摇: 静置态 ±6px ±1.25° */
+.cardstack-3d{position:absolute;inset:0;perspective:1000px;}       /* §3.1: 900→1000, 大Z差畸变更耐看 */
+.cardstack-tilt{position:absolute;inset:0;transform:rotateX(8deg);transform-style:preserve-3d;}
+.tcard{position:absolute;left:50%;top:50%;width:320px;height:200px;margin:-100px 0 0 -160px;
+  transform-origin:50% 120%;
+  background:var(--surface-card);border:1px solid var(--card-edge);border-radius:var(--radius-lg);
+  padding:18px 0;display:flex;flex-direction:column;
+  transition:transform 420ms cubic-bezier(.34,1.34,.64,1),z-index 0s;cursor:pointer;}
+/* 扇形三槽 + V5.1 translateZ 真深度 (0/-30/-60) + 层间阴影三档 (V5.4 加浓) + 方向性 rim 光
+   V5.4: 后层 brightness 压暗 (slot1 .85 / slot2 .93) — 纵深明暗衰减, 顶卡保持原亮度 */
+.tcard[data-slot="1"]{z-index:1;--slam-a:.05;filter:brightness(.85);
+  transform:translate(-56px,10px) rotate(-14deg) rotateX(4deg) translateZ(-60px);
+  box-shadow:var(--card-shadow-1),var(--card-rim);}
+.tcard[data-slot="2"]{z-index:2;--slam-a:.09;filter:brightness(.93);
+  transform:translate(6px,-6px) rotate(-2deg) rotateX(2deg) translateZ(-30px);
+  box-shadow:var(--card-shadow-2),var(--card-rim);}
+.tcard[data-slot="3"]{z-index:3;--slam-a:.16;
+  transform:translate(52px,4px) rotate(10deg) rotateX(-3deg) translateZ(0px);
+  box-shadow:var(--card-shadow-3),var(--card-rim);}
+/* 地面影层: 每卡 ::before 椭圆地影 (slam 砸实载体, §4.2); slot3 兼常驻悬浮环境光 (§3.4) */
+.tcard::before{content:"";position:absolute;left:6%;right:6%;top:100%;height:26px;margin-top:8px;
+  background:radial-gradient(ellipse 80% 46% at 50% 0%, var(--card-ambient), transparent 72%);
+  opacity:var(--slam-a,.12);pointer-events:none;
+  transition:transform 320ms cubic-bezier(.2,0,0,1),opacity 320ms cubic-bezier(.2,0,0,1);}
+/* hover 抬升态阴影 (§7: 双伪元素 opacity 交叉淡入, 禁 transition box-shadow 逐帧重绘) */
+.tcard[data-slot="3"]::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  box-shadow:var(--card-shadow-lift);opacity:0;pointer-events:none;
+  transition:opacity 320ms cubic-bezier(.2,0,0,1);}
+@media (hover:hover){
+  /* 主卡悬浮叙事: Z+28px / Y-8px, 影扩散更淡, 地影 scale1.15 α+0.04 (高度物理反馈) */
+  .tcard[data-slot="3"]:hover{transform:translate(52px,-4px) rotate(10deg) rotateX(-3deg) translateZ(28px);
+    transition:transform 320ms cubic-bezier(.2,0,0,1);}
+  .tcard[data-slot="3"]:hover::after{opacity:1;}
+  .tcard[data-slot="3"]:hover::before{transform:scale(1.15);opacity:calc(var(--slam-a) + .04);}
+}
+/* 文字层 (§3.5): backface 隐藏 + 左右缘 12px 渐隐遮罩 — 大角度旋转期文字不镜像不硬切;
+   遮罩只作用文字面, 卡框/描边在 .tcard 上不受影响。
+   横向 padding 移入 face: 遮罩淡出区(外12px)落在卡面留白内, 静态文字零裁切 */
+.tc-face{display:flex;flex-direction:column;flex:1;padding-inline:20px;backface-visibility:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,black 12px,black calc(100% - 12px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,black 12px,black calc(100% - 12px),transparent 100%);}
+/* 卡面模板: 微标签+序号 / 大字 / 一行说明 / POWERED BY (UX-V5 §4.1) */
+.tcard .tc-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:auto;}
+.tcard .tc-title{font-size:24px;font-weight:700;line-height:1.25;margin:8px 0 4px;}
+.tcard .tc-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;}
+.tcard .tc-powered{margin-top:auto;padding-top:10px;}
+/* 翻牌让位: 顶卡出列 (280ms 加速离开), 其余两卡前移由槽位 transition 承担 */
+.tcard.flip-out{transition:transform 280ms cubic-bezier(.4,0,1,1),opacity 280ms cubic-bezier(.4,0,1,1);
+  transform:translate(180px,0) rotate(18deg) !important;opacity:0;z-index:4;}
+/* 发牌入场: 牌堆位 → 扇形位, 520ms/卡 级差 120ms, spring 过冲 ≈8% 回弹
+   V5.1: 起点加 rotateY(-70deg) — 牌侧立甩入, 保留牌背轮廓不凭空出现 (§4.1) */
+@keyframes deal-in{
+  from{transform:translate(-170px,24px) rotate(-34deg) rotateY(-70deg) scale(.92);opacity:0;}
+}
+.cardstack.dealing .tcard{animation:deal-in 520ms cubic-bezier(.34,1.34,.64,1) backwards;}
+.cardstack.dealing .tcard[data-slot="1"]{animation-delay:0ms;}
+.cardstack.dealing .tcard[data-slot="2"]{animation-delay:120ms;}
+.cardstack.dealing .tcard[data-slot="3"]{animation-delay:240ms;}
+/* slam 砸实 (§4.2): 影层与 deal-in 同 delay 同长 — 前60% 影子先行对位, 60→78% (spring
+   过冲触底) α 冲到常驻值×1.4, 78→100% 回落; 三卡级差同拍, 零 JS */
+@keyframes slam{
+  0%{opacity:0;transform:translateY(-14px) scale(1.35);}
+  60%{opacity:var(--slam-a,.12);transform:translateY(0) scale(1);}
+  78%{opacity:calc(var(--slam-a,.12) * 1.4);transform:translateY(0) scale(1);}
+  100%{opacity:var(--slam-a,.12);transform:translateY(0) scale(1);}
+}
+.cardstack.dealing .tcard::before{animation:slam 520ms cubic-bezier(.34,1.34,.64,1) backwards;}
+.cardstack.dealing .tcard[data-slot="1"]::before{animation-delay:0ms;}
+.cardstack.dealing .tcard[data-slot="2"]::before{animation-delay:120ms;}
+.cardstack.dealing .tcard[data-slot="3"]::before{animation-delay:240ms;}
+/* text-reveal (§3.5-2): 前40%时长文字保持0, 40→70% 淡入 — "牌翻过来, 字才浮现" */
+@keyframes text-reveal{0%,40%{opacity:0;}70%,100%{opacity:1;}}
+.cardstack.dealing .tc-face{animation:text-reveal 520ms ease backwards;}
+.cardstack.dealing .tcard[data-slot="1"] .tc-face{animation-delay:0ms;}
+.cardstack.dealing .tcard[data-slot="2"] .tc-face{animation-delay:120ms;}
+.cardstack.dealing .tcard[data-slot="3"] .tc-face{animation-delay:240ms;}
+/* 翻出让位文字反向: 前 30% 淡出, 永不露被压扁的字 */
+@keyframes text-hide{0%{opacity:1;}30%,100%{opacity:0;}}
+.tcard.flip-out .tc-face{animation:text-hide 280ms ease forwards;}
+/* 残影层 (幽灵层): 发牌轨迹, 纯装饰 aria-hidden, 最后卡落位后 200ms 淡入 */
+.card-ghost{position:absolute;left:50%;top:50%;width:320px;height:200px;margin:-100px 0 0 -160px;
+  transform-origin:50% 120%;border:1px dashed var(--card-ghost-edge);border-radius:var(--radius-lg);
+  opacity:0;transition:opacity 300ms ease;pointer-events:none;}
+.card-ghost.g1{transform:translate(-110px,14px) rotate(-24deg);}
+.card-ghost.g2{transform:translate(-160px,18px) rotate(-34deg);}
+.cardstack.ghosted .card-ghost.g1{opacity:.5;}
+.cardstack.ghosted .card-ghost.g2{opacity:.28;}
+/* 翻牌控件: ‹ › 两钮 44×44 等宽字符 (UX-V5 §4.3) */
+.card-ctrl{display:flex;gap:10px;align-items:center;}
+.card-ctrl button{width:44px;height:44px;border-radius:var(--radius-pill);border:1px solid var(--border-strong);
+  background:transparent;cursor:pointer;color:var(--text-secondary);font-family:var(--font-mono);font-size:18px;
+  line-height:1;transition:color .18s ease,border-color .18s ease,transform .18s ease;}
+.card-ctrl button:hover{color:var(--text-primary);border-color:var(--accent);transform:scale(1.06);}
+/* 无 JS 降级: 控件隐藏, 静态展示卡1 全信息 (卡2/3 收在卡1 下露边缘, UX-V5 §4.5) */
+html:not(.js) .card-ctrl{display:none;}
+html:not(.js) .cardstack .tcard{animation:none !important;}
+html:not(.js) .cardstack .tcard::before{animation:none;}
+html:not(.js) .cardstack .tc-face{animation:none;opacity:1;}
+html:not(.js) .cardstack .card-ghost{opacity:0;}
+/* 375px: 卡 280×180, 扇形 x 偏移 ×0.6, 残影留 1 层 (UX-V5 §9.3)
+   V5.1: Z 差减半 (-30/-15/0), 倾角 6deg — 小屏透视过强挤占卡面可读宽度 (§3.1) */
+@media (max-width:767px){
+  .cardstack{width:300px;height:220px;}
+  .cardstack-tilt{transform:rotateX(6deg);}
+  .tcard,.card-ghost{width:280px;height:180px;margin:-90px 0 0 -140px;}
+  .tcard[data-slot="1"]{transform:translate(-34px,8px) rotate(-14deg) rotateX(4deg) translateZ(-30px);}
+  .tcard[data-slot="2"]{transform:translate(4px,-5px) rotate(-2deg) rotateX(2deg) translateZ(-15px);}
+  .tcard[data-slot="3"]{transform:translate(31px,3px) rotate(10deg) rotateX(-3deg) translateZ(0px);}
+  .card-ghost.g2{display:none;}
+  .tcard .tc-title{font-size:21px;}
+}

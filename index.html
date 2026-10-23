@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="doc.title">Simple-Dot Agent Studio · 让多个 AI Agent 像团队一样替你干活</title>
+<meta name="description" data-i18n-attr="content:doc.desc" content="Simple-Dot Agent Studio">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<!-- CSS: 全部外联, 浏览器并行; tokens 必须最先 (:root 变量), 其余按 V7 合并序 (ARCH-V8 §2.2) -->
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/shell.css">
+<link rel="stylesheet" href="styles/screen.css">
+<link rel="stylesheet" href="styles/screen-v7.css">
+<link rel="stylesheet" href="styles/cardstack.css">
+<link rel="stylesheet" href="styles/motion.css">
+<!-- i18n boot: 首帧前定语言, 防闪烁 (机制继承 v1~v4)
+     inline on purpose: 拆文件后此段仍内联, 防止 i18n 闪烁 (与合并纪律无关, 见 ARCH-V8 §2.1) -->
+<script>
+(function(){
+  var l; try { l = localStorage.getItem('sas-lang'); } catch(e) {}
+  if (l !== 'zh' && l !== 'en')
+    l = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  var d = document.documentElement;
+  d.setAttribute('lang', l === 'zh' ? 'zh-CN' : 'en');
+  d.setAttribute('data-lang', l);
+  if (l !== 'zh') d.classList.add('i18n-pending');
+  d.classList.add('js'); // 脚本可用标记: canvas/控件仅在 JS 环境显示, 无 JS 走 noscript 静态图
+})();
+</script>
+<!-- theme boot: 首帧前定主题, 防 FOUC; 优先级 sas-theme > 系统偏好 > 亮兜底 (UX-V4 §1.2 机制原样继承)
+     inline on purpose: 同 i18n boot, 外联脚本在 HTML 解析后才执行会闪一帧 (ARCH-V8 §2.1) -->
+<meta name="theme-color" content="#fbf9f6">
+<script>
+(function(){
+  var t; try { t = localStorage.getItem('sas-theme'); } catch(e) {}
+  if (t !== 'light' && t !== 'dark')
+    t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  var d = document.documentElement;
+  d.setAttribute('data-theme', t);
+  var mc = document.querySelector('meta[name="theme-color"]');
+  if (mc) mc.setAttribute('content', t === 'dark' ? '#0f0e10' : '#fbf9f6');
+})();
+</script>
+<!-- JS: 全部 defer, 按文档序下载+执行 (ARCH-V8 §2.2)。
+     SAS_V7 挂载在 shell 之后; shell 的 setSubState 通过 lazy getter 在调用时拉取,
+     与 V7 merge 单 script 块行为等价 (决策 A-2) -->
+<script defer src="scripts/i18n.js"></script>
+<script defer src="scripts/i18n-en.js"></script>
+<script defer src="scripts/carousel.js"></script>
+<script defer src="scripts/inputs.js"></script>
+<script defer src="scripts/shell.js"></script>
+<script defer src="scripts/screen-v7.js"></script>
+<script defer src="scripts/screen-v10.js"></script>
+<script defer src="scripts/screen-v11.js"></script>
+<script defer src="scripts/starfield.js"></script>
+<script defer src="scripts/logo.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main" data-i18n="a11y.skip">跳到主内容</a>
+<!-- 星空氛围层: 单实例 canvas, 装饰, aria-hidden (UX-V5 §5; A1 零触碰) -->
+<canvas id="starfield" aria-hidden="true"></canvas>
+<!-- V5.1 vignette 暗角: z1 聚焦构图, 装饰 (UX-POLISH-V5.1 §2.4) -->
+<div class="vignette" aria-hidden="true"></div>
+<!-- ===== V6 header (V4式回收, UX-V6 §7): 品牌 + 4屏文字链 + README/GitHub + 主题 + 语言; C1 START 钮已删 ===== -->
+<header class="site-header">
+  <a class="shell-brand" href="#platform" aria-label="Simple-Dot Agent Studio">
+    <canvas class="logo-mark" data-logo="light" data-size="32" aria-hidden="true"></canvas>
+    <noscript><img width="32" height="32" alt="" aria-hidden="true" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5.4' fill='none' stroke='%23343A40' stroke-width='1.7'/%3E%3Ccircle cx='3.9' cy='3.9' r='1.35' fill='%231E90FF'/%3E%3Ccircle cx='4.0' cy='12.0' r='1.2' fill='%231E90FF'/%3E%3Ccircle cx='10.0' cy='10.0' r='1.8' fill='%231E90FF'/%3E%3C/svg%3E"></noscript>
+    <span class="logo-word">Simple-Dot Agent Studio</span>
+  </a>
+  <div class="shell-spacer"></div>
+  <nav class="nav-links" aria-label="屏导航" data-i18n-attr="aria-label:pill.aria">
+    <a href="#platform" data-target="platform" class="is-active" aria-current="page" data-i18n="nav.screen.platform">平台能力</a>
+    <a href="#scenarios" data-target="scenarios" data-i18n="nav.screen.scenarios">场景案例</a>
+    <a href="#start" data-target="start" data-i18n="nav.screen.start">快速开始</a>
+    <a href="#contact" data-target="contact" data-i18n="nav.screen.contact">联系我们</a>
+  </nav>
+  <span class="mtag" aria-hidden="true">│</span>
+  <nav class="nav-ext" aria-label="外链">
+    <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">README</a>
+    <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+  </nav>
+  <div class="shell-actions">
+    <button type="button" class="icon-btn theme-toggle" aria-pressed="false" data-i18n-attr="aria-label:theme.toggle" aria-label="切换主题">
+      <svg class="ic-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="ic-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    </button>
+    <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.switch" aria-label="切换语言">
+      <button type="button" data-lang-btn="zh" aria-checked="true">中</button>
+      <button type="button" data-lang-btn="en" aria-checked="false">EN</button>
+    </div>
+  </div>
+  <!-- 汉堡 (仅 <1024 可见, 44×44, V4 F8 焦点圈闭机制) -->
+  <button type="button" class="hamburger" aria-expanded="false" aria-controls="mobileMenu" data-i18n-attr="aria-label:a11y.menu" aria-label="菜单">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+</header>
+<!-- 移动菜单遮罩 + 抽屉: 4屏链 + README/GitHub + 语言 + 主题 (UX-V6 §7.2; C6 移动胶囊行替代者) -->
+<div class="menu-overlay" id="menuOverlay"></div>
+<nav class="mobile-menu" id="mobileMenu" data-i18n-attr="aria-label:a11y.nav.mobile" aria-label="移动端导航">
+  <a href="#platform" data-target="platform" class="is-active" aria-current="page" data-i18n="nav.screen.platform">平台能力</a>
+  <a href="#scenarios" data-target="scenarios" data-i18n="nav.screen.scenarios">场景案例</a>
+  <a href="#start" data-target="start" data-i18n="nav.screen.start">快速开始</a>
+  <a href="#contact" data-target="contact" data-i18n="nav.screen.contact">联系我们</a>
+  <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">README</a>
+  <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+  <div class="mm-row">
+    <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.switch" aria-label="切换语言">
+      <button type="button" data-lang-btn="zh" aria-checked="true">中</button>
+      <button type="button" data-lang-btn="en" aria-checked="false">EN</button>
+    </div>
+  </div>
+  <div class="mm-row">
+    <button type="button" class="icon-btn theme-toggle" aria-pressed="false" data-i18n-attr="aria-label:theme.toggle" aria-label="切换主题">
+      <svg class="ic-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="ic-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    </button>
+  </div>
+</nav>
+<main id="main" tabindex="-1" role="region" aria-roledescription="轮播" data-i18n-attr="aria-roledescription:carousel.roledescription">
+<!-- ===== 屏 1 · 平台能力: 价值主张 + 任务卡堆主视觉 (UX-V5 §1.2/§4) ===== -->
+<section class="screen screen--platform is-active" id="screen-platform" role="region" aria-roledescription="屏幕" aria-label="平台能力" data-i18n-attr="aria-roledescription:screen.roledescription,aria-label:nav.screen.platform">
+  <div class="screen-inner">
+    <div class="p-grid">
+      <div class="p-copy">
+        <div class="eyebrow" data-i18n="hero.eyebrow">多 Agent 协作平台 · Multi-agent platform</div>
+        <h1 class="p-title"><span data-i18n="hero.t1">让多个 AI Agent 像一支</span> <span class="hl" data-i18n="hero.hl">训练有素的团队</span><span data-i18n="hero.t2">，长时间替你干活</span></h1>
+        <p class="p-sub" data-i18n="hero.sub">基于 Hermes 原生 Kanban 的多 Agent 长时任务编排与追踪平台。</p>
+        <div class="p-values">
+          <div class="p-value"><b data-i18n="hero.v1">长时间替你干活</b><span data-i18n="hero.v1n">小时级任务持续运行，不用一直盯着。</span></div>
+          <div class="p-value"><b data-i18n="hero.v2">跑挂了能续上</b><span data-i18n="hero.v2n">中断后原地恢复，不从头再来。</span></div>
+          <div class="p-value"><b data-i18n="hero.v3">全程可追踪审计</b><span data-i18n="hero.v3n">谁在干、干到哪、产物在哪，一目了然。</span></div>
+        </div>
+        <div class="p-aud" aria-label="适合谁" data-i18n-attr="aria-label:a11y.audience">
+          <span data-i18n="aud.p1">个人开发者</span>
+          <span data-i18n="aud.p2">小团队</span>
+          <span data-i18n="aud.p3">批量长任务的运营场景</span>
+        </div>
+        <div class="p-cta">
+          <button type="button" class="btn-start" data-goto="start" data-i18n="hero.cta.start">快速开始</button>
+          <a class="btn-ghost" href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank" data-i18n="hero.cta.github">GitHub ↗</a>
+        </div>
+      </div>
+      <!-- 任务卡堆: 需求卡 → Agent 执行卡 → 产物卡 (Simple-Dot 自有隐喻, REQ-V5 §4) -->
+      <div class="cardstack-wrap">
+        <!-- V5.2 视差补偿外层 (§7): 屏移1.0/卡堆净0.55, 本层反向补偿0.45; .cardstack 本体零触碰 -->
+        <div class="cardstack-parallax">
+        <div class="cardstack" id="cardstack">
+          <!-- V5.1 真3D 分层: .cardstack(rock) > .cardstack-3d(perspective) > .cardstack-tilt(rotateX8) > 卡 -->
+          <div class="cardstack-3d"><div class="cardstack-tilt">
+          <div class="card-ghost g1" aria-hidden="true"></div>
+          <div class="card-ghost g2" aria-hidden="true"></div>
+          <article class="tcard" data-card="1" data-slot="1">
+            <div class="tc-face">
+            <div class="tc-head"><span class="mtag" data-i18n="card1.tag">一句话需求</span><span class="mtag tc-seq" data-i18n="card1.seq">01/03</span></div>
+            <div class="tc-title" data-i18n="card1.title">你提的活，一句话</div>
+            <div class="tc-desc" data-i18n="card1.desc">派活只要一句人话，不用写工单。</div>
+            <div class="tc-powered mtag mtag--powered">POWERED BY SIMPLE-DOT</div>
+            </div>
+          </article>
+          <article class="tcard" data-card="2" data-slot="2">
+            <div class="tc-face">
+            <div class="tc-head"><span class="mtag" data-i18n="card2.tag">并行执行</span><span class="mtag tc-seq" data-i18n="card2.seq">02/03</span></div>
+            <div class="tc-title" data-i18n="card2.title">Agent 团队并行干活</div>
+            <div class="tc-desc" data-i18n="card2.desc">独立容器同时跑，进度实时回流。</div>
+            <div class="tc-powered mtag mtag--powered">POWERED BY SIMPLE-DOT</div>
+            </div>
+          </article>
+          <article class="tcard" data-card="3" data-slot="3">
+            <div class="tc-face">
+            <div class="tc-head"><span class="mtag" data-i18n="card3.tag">结算回执</span><span class="mtag tc-seq" data-i18n="card3.seq">03/03</span></div>
+            <div class="tc-title" data-i18n="card3.title">产物 + 结算回执</div>
+            <div class="tc-desc" data-i18n="card3.desc">三重校验只认真凭据，失败不装成功。</div>
+            <div class="tc-powered mtag mtag--powered">POWERED BY SIMPLE-DOT</div>
+            </div>
+          </article>
+          </div></div>
+        </div>
+        </div><!-- /.cardstack-parallax -->
+        <div class="card-ctrl">
+          <button type="button" id="cardPrev" data-i18n-attr="aria-label:card.prev" aria-label="上一张">‹</button>
+          <button type="button" id="cardNext" data-i18n-attr="aria-label:card.next" aria-label="下一张">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ===== 屏 2 · 场景案例 (V7 左大卡 ↔ 右侧编号列表 换牌动效, REQ-V7 §3.3 / UX-V7 §1~§3)
+   V7: 三张卡常驻 DOM 槽位轮换 (隐藏态走 visibility:hidden, 非 hidden 硬切);
+   右栏 = nav + 3 button + rail-ind (滑动高亮条), aria-current 语义继承 V6 §3.1 D7 ===== -->
+<section class="screen screen--scenarios" id="screen-scenarios" role="region" aria-roledescription="屏幕" aria-label="场景案例" data-i18n-attr="aria-roledescription:screen.roledescription,aria-label:nav.screen.scenarios" hidden>
+  <div class="screen-inner">
+    <div class="sc-chrome">
+      <div class="eyebrow" data-i18n="sc.kicker">场景案例 / Scenarios</div>
+      <h2 data-i18n="sc.title">你会用它做什么</h2>
+    </div>
+
+    <!-- V7 两栏布局: 左 sc-stack 牌堆 + 右 sc-rail 编号列表 -->
+    <div class="sc-stage">
+      <!-- 左栏: 牌堆 (顶卡 slot-a = 当前态, slot-b/c = 残影 aria-hidden) -->
+      <div class="sc-stack" aria-live="off">
+        <!-- 态 A · S1 过夜长任务 (初始顶卡 slot-a; V8 R3.4: 顶卡不写 aria-hidden) -->
+        <div class="sc-card slot-a" id="sub-scenarios-0" data-substate="0">
+          <div class="sc-name" data-i18n="s1.big">过夜长任务</div>
+          <div class="sc-tags" aria-hidden="true"><span>OVERNIGHT JOBS</span><span>PARALLEL EXECUTION</span><span>AUTO SETTLEMENT</span></div>
+          <p class="sc-story" data-i18n="s1.story">「下班前把整个 issue 列表交给 Agent，它在夜晚自动逐条处理，第二天早上你直接验收结果——跑完的、卡住的、跑挂的，全都摆在那里等你确认。」</p>
+          <figure class="shot-frame sc-shot">
+            <span class="shot-tag" data-i18n="s1.shot.tag">实图 / Screenshot</span>
+            <div class="shot-body">
+              <!-- V11: 原 SVG 假图整段替换为真实截图 (D 组 comment508__48, REQ-V11 §2.3 映射表; 单图图组不渲染 ctrl/pager = UX-V11 §3) -->
+              <div class="shot-group" aria-roledescription="image carousel" data-i18n-attr="aria-label:shot.group.label" aria-label="功能截图图组">
+                <a class="shot-zoom" href="assets/sc-overnight.webp" target="_blank" rel="noopener">
+                  <img class="sc-shot" data-shot-idx="0" src="assets/sc-overnight.webp" data-i18n-attr="alt:s1.shot.alt" alt="夜间 issue 列表批处理完成记录截图（9/9 步、已结束）" loading="lazy" decoding="async" width="1500" height="884"/>
+                  <span class="shot-zoom-hint" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14" stroke-linecap="round"/></svg></span>
+                </a>
+              </div>
+            </div>
+            <figcaption data-i18n="sc01.cap">夜间批处理记录：每条 issue 的处理步骤、完成时间与归档状态一目了然</figcaption>
+          </figure>
+        </div>
+        <!-- 态 B · S2 多角色流水线 (残影卡 slot-b/c, 内容组与 slot-a 同构, V7 fix-up D-V7-P0-1) -->
+        <div class="sc-card slot-b" id="sub-scenarios-1" data-substate="1" aria-hidden="true">
+          <div class="sc-name" data-i18n="s2.big">多角色流水线</div>
+          <div class="sc-tags" aria-hidden="true"><span>MULTI-ROLE</span><span>PIPELINE</span><span>STREAMING</span></div>
+          <p class="sc-story" data-i18n="s2.story">「产品经理拆需求、工程师写码、测试验收，一条流水线自动流转，卡住会主动来问我，而不是瞎做。」</p>
+          <figure class="shot-frame sc-shot">
+            <span class="shot-tag" data-i18n="s2.shot.tag">实图 / Screenshot</span>
+            <div class="shot-body">
+              <!-- V11: 原 SVG 假图整段替换为 2 张真实截图 (A/B 组 comment367__42/43, REQ-V11 §2.3); 双图图组渲染 ctrl+pager, 结构对齐 S4 (UX-V11 §3) -->
+              <div class="shot-group" aria-roledescription="image carousel" data-i18n-attr="aria-label:shot.group.label" aria-label="功能截图图组">
+                <a class="shot-zoom" href="assets/sc-pipeline-1.webp" target="_blank" rel="noopener">
+                  <img class="sc-shot" data-shot-idx="0" src="assets/sc-pipeline-1.webp" data-i18n-attr="alt:s2.shot1.alt" alt="执行员名册与能力标签截图" loading="lazy" decoding="async" width="1500" height="800"/>
+                  <span class="shot-zoom-hint" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14" stroke-linecap="round"/></svg></span>
+                </a>
+                <a class="shot-zoom" href="assets/sc-pipeline-2.webp" target="_blank" rel="noopener" hidden>
+                  <img class="sc-shot" data-shot-idx="1" src="assets/sc-pipeline-2.webp" data-i18n-attr="alt:s2.shot2.alt" alt="工作流任务计划弹窗截图" loading="lazy" decoding="async" width="1500" height="764"/>
+                  <span class="shot-zoom-hint" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14" stroke-linecap="round"/></svg></span>
+                </a>
+              </div>
+              <div class="shot-pager" aria-live="polite" aria-atomic="true" data-i18n-attr="aria-label:shot.pager.label" aria-label="图组当前张序 / 总张数">
+                <span class="shot-pager-text"><span class="shot-pager-cur">1</span>/<span class="shot-pager-total">2</span></span>
+                <span class="shot-pager-dots" aria-hidden="true"><span class="dot is-active"></span><span class="dot"></span></span>
+              </div>
+              <button type="button" class="shot-ctrl shot-ctrl-prev" data-i18n-attr="aria-label:shot.prev" aria-label="上一张" disabled aria-disabled="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L4 8 L10 13"/></svg></button>
+              <button type="button" class="shot-ctrl shot-ctrl-next" data-i18n-attr="aria-label:shot.next" aria-label="下一张"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3 L12 8 L6 13"/></svg></button>
+            </div>
+            <figcaption data-i18n="sc02.cap">像聊天一样派发和追踪任务：流式回复 + 思考过程可见</figcaption>
+          </figure>
+        </div>
+        <div class="sc-card slot-c" id="sub-scenarios-2" data-substate="2" aria-hidden="true">
+          <div class="sc-name" data-i18n="s3.big">全程可追踪</div>
+          <div class="sc-tags" aria-hidden="true"><span>FULL CHAIN</span><span>TRACEABILITY</span><span>AUDITABLE</span></div>
+          <p class="sc-story" data-i18n="s3.story">「谁在干什么、干到哪一步、产物在哪，打开看板一目了然；出问题能回放每一步操作。」</p>
+          <figure class="shot-frame sc-shot">
+            <span class="shot-tag" data-i18n="s3.shot.tag">实图 / Screenshot</span>
+            <div class="shot-body">
+              <!-- V10 R3.1: 本卡换为真实截图 (单图图组); V11: 加灯箱锚点包裹, alt/caption 按 R-M2 人工复核结论改写; 资源沿用 V10 同档文件 (UX-V11 §8 允许沿用, 对比见 IMPL-V11) -->
+              <div class="shot-group" aria-roledescription="image carousel" data-i18n-attr="aria-label:shot.group.label" aria-label="功能截图图组">
+                <a class="shot-zoom" href="assets/sc-traceable.webp" target="_blank" rel="noopener">
+                  <img class="sc-shot" data-shot-idx="0" src="assets/sc-traceable.webp" data-i18n-attr="alt:s3.shot.alt" alt="任务计划与执行步骤面板截图" loading="lazy" decoding="async" width="1000" height="1040"/>
+                  <span class="shot-zoom-hint" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14" stroke-linecap="round"/></svg></span>
+                </a>
+              </div>
+            </div>
+            <figcaption data-i18n="sc03.cap">任务计划与执行步骤全程可溯：计划、进度、归档逐条留痕（真实截图）</figcaption>
+          </figure>
+        </div>
+        <!-- 态 D · S4 完全兼容优秀开源项目 (V10 R2 新增; 首屏 slot-d 待浮现层, rail 04 后升顶卡 slot-a;
+             双真实截图 + 版权原始 GitHub 链接红线 = REQ-V10 §3.2, 两链接 href+caption 各 ≥2 命中不可删) -->
+        <div class="sc-card slot-d" id="sub-scenarios-3" data-substate="3" aria-hidden="true">
+          <div class="sc-name" data-i18n="s4.big">完全兼容优秀开源项目</div>
+          <div class="sc-tags" aria-hidden="true"><span>OPEN-SOURCE</span><span>COMPATIBLE</span><span>PROTOCOL LAYER</span></div>
+          <p class="sc-story" data-i18n="s4.story">「直接对接开源生态——任务、产物与执行记录按协议层互通，不用为了接入既有开源工具重新造一遍轮子。」</p>
+          <figure class="shot-frame sc-shot">
+            <span class="shot-tag" data-i18n="s4.shot.tag">实图 / Screenshot</span>
+            <div class="shot-body">
+              <div class="shot-group" aria-roledescription="image carousel" data-i18n-attr="aria-label:shot.group.label" aria-label="功能截图图组">
+                <a class="shot-zoom" href="assets/sc-oss-pixel-agents.webp" target="_blank" rel="noopener">
+                  <img class="sc-shot" data-shot-idx="0" src="assets/sc-oss-pixel-agents.webp" data-i18n-attr="alt:s4.oss1.alt" alt="pixel-agents 多 Agent 任务看板截图" loading="lazy" decoding="async" width="1500" height="792"/>
+                  <span class="shot-zoom-hint" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14" stroke-linecap="round"/></svg></span>
+                </a>
+                <a class="shot-zoom" href="assets/sc-oss-hermes-webui.webp" target="_blank" rel="noopener" hidden>
+                  <img class="sc-shot" data-shot-idx="1" src="assets/sc-oss-hermes-webui.webp" data-i18n-attr="alt:s4.oss2.alt" alt="hermes-webui 任务派发与追踪界面截图" loading="lazy" decoding="async" width="1500" height="796"/>
+                  <span class="shot-zoom-hint" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14" stroke-linecap="round"/></svg></span>
+                </a>
+              </div>
+              <div class="shot-pager" aria-live="polite" aria-atomic="true" data-i18n-attr="aria-label:shot.pager.label" aria-label="图组当前张序 / 总张数">
+                <span class="shot-pager-text"><span class="shot-pager-cur">1</span>/<span class="shot-pager-total">2</span></span>
+                <span class="shot-pager-dots" aria-hidden="true"><span class="dot is-active"></span><span class="dot"></span></span>
+              </div>
+              <button type="button" class="shot-ctrl shot-ctrl-prev" data-i18n-attr="aria-label:shot.prev" aria-label="上一张" disabled aria-disabled="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L4 8 L10 13"/></svg></button>
+              <button type="button" class="shot-ctrl shot-ctrl-next" data-i18n-attr="aria-label:shot.next" aria-label="下一张"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3 L12 8 L6 13"/></svg></button>
+            </div>
+            <figcaption class="sc-cap" data-i18n="s4.cap">开源项目双向打通：任务与资产流即接即用（图示为两个开源项目的集成实录）</figcaption>
+            <p class="shot-credit" data-shot-credit-for="0">
+              <span data-i18n="s4.oss1.credit.prefix">截图来源 / Source:</span>
+              <span class="shot-credit-name">pixel-agents</span><span class="shot-credit-sep"> · </span><a href="https://github.com/pixel-agents-hq/pixel-agents" rel="noopener" target="_blank" data-i18n="s4.oss1.credit.link">github.com/pixel-agents-hq/pixel-agents</a>
+            </p>
+            <p class="shot-credit" data-shot-credit-for="1" hidden>
+              <span data-i18n="s4.oss2.credit.prefix">截图来源 / Source:</span>
+              <span class="shot-credit-name">hermes-webui</span><span class="shot-credit-sep"> · </span><a href="https://github.com/nesquena/hermes-webui" rel="noopener" target="_blank" data-i18n="s4.oss2.credit.link">github.com/nesquena/hermes-webui</a>
+            </p>
+          </figure>
+        </div>
+      </div>
+      <!-- 右栏: 编号选择列表 (nav + 4 button + rail-ind; V10 加 04 = REQ-V10 R2.1) -->
+      <nav class="sc-rail no-anim" data-i18n-attr="aria-label:a11y.subnav.sc" aria-label="场景案例子导航">
+        <span class="rail-ind" aria-hidden="true"></span>
+        <button type="button" data-sub="0" data-i18n-attr="aria-label:s1.rail.label" aria-label="01 过夜长任务" aria-current="true"><span class="rail-no" aria-hidden="true">01</span><span data-i18n="stab.s1">过夜长任务</span><svg class="rail-star" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 1.2 L7 4.5 L10.3 5 L7.6 6.9 L8.4 10.3 L6 8.2 L3.6 10.3 L4.4 6.9 L1.7 5 L5 4.5 Z"/><circle cx="9.5" cy="2.5" r="0.7"/></svg></button>
+        <button type="button" data-sub="1" data-i18n-attr="aria-label:s2.rail.label" aria-label="02 多角色流水线" aria-current="false"><span class="rail-no" aria-hidden="true">02</span><span data-i18n="stab.s2">多角色流水线</span><svg class="rail-star" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 1.2 L7 4.5 L10.3 5 L7.6 6.9 L8.4 10.3 L6 8.2 L3.6 10.3 L4.4 6.9 L1.7 5 L5 4.5 Z"/><circle cx="9.5" cy="2.5" r="0.7"/></svg></button>
+        <button type="button" data-sub="2" data-i18n-attr="aria-label:s3.rail.label" aria-label="03 全程可追踪" aria-current="false"><span class="rail-no" aria-hidden="true">03</span><span data-i18n="stab.s3">全程可追踪</span><svg class="rail-star" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 1.2 L7 4.5 L10.3 5 L7.6 6.9 L8.4 10.3 L6 8.2 L3.6 10.3 L4.4 6.9 L1.7 5 L5 4.5 Z"/><circle cx="9.5" cy="2.5" r="0.7"/></svg></button>
+        <button type="button" data-sub="3" aria-current="false" data-i18n-attr="aria-label:s4.rail.label" aria-label="04 开源兼容"><span class="rail-no" aria-hidden="true">04</span><span data-i18n="stab.s4">开源兼容</span><svg class="rail-star" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 1.2 L7 4.5 L10.3 5 L7.6 6.9 L8.4 10.3 L6 8.2 L3.6 10.3 L4.4 6.9 L1.7 5 L5 4.5 Z"/><circle cx="9.5" cy="2.5" r="0.7"/></svg></button>
+      </nav>
+    </div>
+  </div>
+</section>
+<!-- ===== 屏 3 · 快速开始 (V6 三态, REQ-V6 §4.4): 态A 部署 / 态B 上手 / 态C 边界与FAQ+footer带
+   命令逐字符一致纪律不变 (AC-V6-06); C2 技术折叠区/C4 双列清单/C5 FAQ q2q4 已删; Q-13 → §7 一行带 ===== -->
+<section class="screen screen--start" id="screen-start" role="region" aria-roledescription="屏幕" aria-label="快速开始" data-i18n-attr="aria-roledescription:screen.roledescription,aria-label:nav.screen.start" hidden>
+  <div class="screen-inner">
+    <div class="sc-chrome">
+      <div class="eyebrow" data-i18n="qs.kicker">快速开始 / Quick Start</div>
+      <h2 data-i18n="qs.title">快速开始</h2>
+      <nav class="subnav no-anim" data-i18n-attr="aria-label:a11y.subnav.st" aria-label="快速开始子导航">
+        <div class="pill-track">
+          <span class="pill-ind" aria-hidden="true"></span>
+          <button type="button" aria-current="true" data-sub="0" data-i18n="stab.deploy">部署</button>
+          <button type="button" aria-current="false" data-sub="1" data-i18n="stab.onb">上手</button>
+          <button type="button" aria-current="false" data-sub="2" data-i18n="stab.bound">边界</button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- 态 A · 部署: 前置条件 (桌面表 / 375 芯片行 D10) + ①~④ 命令组 -->
+    <div class="substate" id="sub-start-0" data-substate="0">
+      <div class="scroll-x pre-table">
+        <table class="matrix">
+          <thead><tr><th data-i18n="qs.pre.h1">项目</th><th data-i18n="qs.pre.h2">要求</th><th data-i18n="qs.pre.h3">自检命令</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Docker</td><td data-i18n="qs.pre.r1r">v20+ 且当前用户可执行</td><td><code>docker ps</code></td></tr>
+            <tr><td data-i18n="qs.pre.r2">compose 插件</td><td data-i18n="qs.pre.r2r">docker compose v2</td><td><code>docker compose version</code></td></tr>
+            <tr><td data-i18n="qs.pre.r3">模型端点</td><td data-i18n="qs.pre.r3r">OpenAI 兼容 API，已在 Hermes 配好</td><td><code>curl &lt;base_url&gt;/models</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pre-chips" aria-label="前置条件" data-i18n-attr="aria-label:qs.pre.h1">
+        <span class="chip">Docker v20+</span><span class="chip" data-i18n="qs.pre.r2">compose 插件</span><span class="chip" data-i18n="qs.pre.r3">模型端点</span>
+      </div>
+      <div class="st-step">
+        <h3>① <span data-i18n="qs.step1">拿代码</span></h3>
+        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code>git clone https://github.com/feigbar-beep/simpledot-agent-studio &amp;&amp; cd &lt;repo&gt;</code></pre></div>
+      </div>
+      <div class="st-step">
+        <h3>② <span data-i18n="qs.step2">填配置（只填带 ★ 的一项即可跑）</span></h3>
+        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code>cp .env.example .env &amp;&amp; vi .env</code></pre></div>
+        <div class="warn" data-i18n="qs.step2w">★ API_SERVER_KEY（生成：openssl rand -hex 32）</div>
+      </div>
+      <div class="st-step">
+        <h3>③ <span data-i18n="qs.step3">一键部署</span></h3>
+        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code>./deploy/install.sh</code></pre></div>
+      </div>
+      <div class="st-step">
+        <h3>④ <span data-i18n="qs.step4">验证并打开控制台</span></h3>
+        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code>./deploy/verify.sh
+open http://&lt;host&gt;:8700</code></pre></div>
+      </div>
+    </div>
+
+    <!-- 态 B · 上手: worker 四步 + 2 callout + DEPLOY 一行 (Q-6 压缩Z) -->
+    <div class="substate" id="sub-start-1" data-substate="1" hidden>
+      <h3 class="st-h3" data-i18n="qs.worker.title">加第一个 worker（控制台操作，无需命令行）</h3>
+      <ol class="qs-ol">
+        <li data-i18n="qs.worker.s1">打开控制台 → Worker 管理 → 添加 worker</li>
+        <li data-i18n="qs.worker.s2">填 profile 名（如 coder）与 gateway 地址；模型字段只是请求别名，真实模型由 worker 自己的 Hermes 配置决定</li>
+        <li data-i18n="qs.worker.s3">控制台生成 worker compose 片段 → 按提示在目标机器起容器</li>
+        <li data-i18n="qs.worker.s4">保存后 main 即可向该 profile 下发任务</li>
+      </ol>
+      <div class="callout" data-i18n="qs.callout.root">worker 容器必须设环境变量 HERMES_WRITE_SAFE_ROOT=/share_workspace，否则写不了共享卷。</div>
+      <div class="callout" data-i18n="qs.callout.model">模型 / 端点是 Hermes 自身的配置，本平台不代管——改模型只改 worker 自己，注册表一字不动。</div>
+      <p class="mt10 txt-sm" data-i18n="qs.trouble.link">完整故障排查见部署文档 <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">DEPLOY ↗</a></p>
+    </div>
+
+    <!-- 态 C · 边界与 FAQ: 金句 → 注 → webui 单链 → FAQ×2 互斥 → 数据安全小字 → footer 一行带 (D3 阅读序) -->
+    <div class="substate substate--end" id="sub-start-2" data-substate="2" hidden>
+      <h3 class="st-h3" data-i18n="bd.title">各管一段，互不越界</h3>
+      <div class="bd-quote">「<span data-i18n="bd.quote">这里管工作流，那里管 Agent。</span>」</div>
+      <p class="mt6 txt-sm muted" data-i18n="bd.quote.sub">想让 Agent 本身更强，去配 Hermes；想让它们协同干活可管理，用我们。</p>
+      <p class="mt10"><a href="https://github.com/nesquena/hermes-webui" rel="noopener" target="_blank" data-i18n="bd.link.webui">hermes-webui ↗</a></p>
+      <div id="faq">
+        <div class="accordion" data-exclusive="1"><button class="acc-btn" aria-expanded="false"><span data-i18n="faq.q1">和 hermes-webui 有什么区别？</span><svg aria-hidden="true" class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div class="acc-inner"><div data-i18n="faq.a1">本平台是为「任务编排」服务的轻量界面（看板 + 对话入口 + 执行员注册），不是 Hermes 的通用 Web 前端。需要更完善的 WebUI 请用 hermes-webui。</div></div></div></div>
+        <div class="accordion" data-exclusive="1"><button class="acc-btn" aria-expanded="false"><span data-i18n="faq.q3">任务跑挂了怎么办？</span><svg aria-hidden="true" class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div class="acc-inner"><div data-i18n="faq.a3">会话存档独立于进程存活，执行容器崩溃后可凭存档同会话恢复；失败只标记阻塞、绝不误判成功，重派是主控（main）的显式决策。</div></div></div></div>
+      </div>
+      <p class="mt10 txt-sm muted" data-i18n="faq.data">全本地部署：看板、会话、产物都在你自己的 ./data/ 目录，整目录拷走即可迁移。</p>
+      <!-- V9: footer (+ft-icp, 元素 6) 已迁至末屏 contact 内, 归入 .screen fixed 体系 (#6 冻结对象经 V9 issue#8 决议变更) -->
+    </div>
+  </div>
+</section>
+<!-- ===== 屏 4 · 联系我们 (V8 新增, UX-V8 §3.1 / ARCH-V8 §4.3): 单列居中「一语一通道」
+   EN 模式渲染邮箱块 / ZH 模式渲染二维码块, 互斥由 html[data-lang] 纯 CSS 分流 (零 JS) ===== -->
+<section class="screen screen--contact" id="screen-contact" role="region"
+         aria-roledescription="屏幕" aria-label="联系我们"
+         data-i18n-attr="aria-roledescription:screen.roledescription,aria-label:nav.screen.contact"
+         hidden>
+  <div class="screen-inner">
+    <div class="sc-chrome">
+      <div class="eyebrow" data-i18n="ct.kicker">联系我们</div>
+      <h2 data-i18n="ct.title">跟我们聊聊</h2>
+      <p class="lead" data-i18n="ct.lead">产品、部署或合作相关问题，直接联系团队。</p>
+    </div>
+
+    <!-- 邮箱块: EN 模式显示, ZH 模式 display:none (CSS 互斥); href = 地址唯一真相, 文本由 shell.js boot 注水 -->
+    <div class="ct-block ct-block--mail">
+      <span class="ct-label" data-i18n="ct.mail.label">邮箱</span>
+      <a class="ct-mail" href="mailto:barlcky@gmail.com"><!-- 可见文本由 shell.js boot injectMailText() 从 href 注水; 地址唯一真相 = 上一行 href (UX-V8 D4, AC-B05 grep 命中=1) --></a>
+      <p class="ct-micro" data-i18n="ct.mail.hint">写信给我们，描述越具体，回复越准确。</p>
+    </div>
+
+    <!-- 二维码块: ZH 模式显示, EN 模式 display:none; 资产为 contact-wecom-qr.jpeg -->
+    <div class="ct-block ct-block--qr">
+      <span class="ct-label" data-i18n="ct.qr.label">企业微信</span>
+      <figure class="ct-qr-frame">
+        <img class="ct-qr" src="assets/contact-wecom-qr.jpeg" width="208" height="208"
+             data-i18n-attr="alt:ct.qr.alt" alt="简单点儿Agent协作平台企业微信二维码">
+        <figcaption class="ct-caption" data-i18n="ct.qr.caption">简单点儿Agent协作平台</figcaption>
+      </figure>
+      <p class="ct-micro" data-i18n="ct.qr.hint">微信扫一扫，添加企业微信</p>
+    </div>
+    <footer class="ft-strip">
+      <span class="ft-copy">© 2026 Simple-Dot Agent Studio</span>
+      <span class="ft-priv" data-i18n="ft.privacy">本站仅在 localStorage 保存你的语言与主题偏好，不使用 cookie、不追踪。</span>
+      <span class="ft-icp">沪ICP备17027014号-1</span>
+      <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">README</a>
+      <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">design.md</a>
+      <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+    </footer>
+  </div>
+</section>
+</main>
+<!-- V11 灯箱 (UX-V11 §2.1): 单例, 不挂任何 .screen 内; 无 JS 时整块隐藏, 降级 = <a> 直达原图 (AC-C05) -->
+<div class="lb" id="lightbox" role="dialog" aria-modal="true" hidden
+     aria-roledescription="图片查看" aria-label="截图查看器"
+     data-i18n-attr="aria-roledescription:lb.roledescription,aria-label:lb.label">
+  <div class="lb-backdrop" data-lb-close></div>
+  <div class="lb-panel">
+    <button type="button" class="lb-close" data-i18n-attr="aria-label:lb.close" aria-label="关闭">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 4 L12 12 M12 4 L4 12"/></svg>
+    </button>
+    <img class="lb-img" alt=""/><!-- V11 CR-3: 省略空 src (空串按文档基址解析出无意义自请求); boot 后由 open() 注入, close() 移除 -->
+    <p class="lb-caption"></p>
+    <a class="lb-opennew" href="#" target="_blank" rel="noopener" data-i18n="lb.opennew">在新窗口打开原图</a>
+  </div>
+</div>
+<!-- aria-live 播报区 (UX-V5 §6.3, 视觉隐藏; V6 扩展播「屏名 · 态名」) -->
+<div class="live-region sr-only" aria-live="polite" id="liveRegion"></div>
+</body>
+</html>

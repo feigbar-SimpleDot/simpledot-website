@@ -1,0 +1,65 @@
+/* ===== 动效全清单 M1~M7 (UX-V5 §7) + 主题过渡门控 + reduced-motion 降级矩阵 (§8) =====
+   循环元素清点: 星空ticker(13-star.js) + LOGO ticker(14-logo.js) + M4 + M5 + M7 = 5 ≤ 8
+   性能纪律: 除星空/LOGO 两 ticker 外零常驻 JS 循环; CSS 只用 transform/opacity
+   (M7 background-position 为 V4 已验收例外, 单元素 8s, 登记沿用) */
+
+/* M4 呼吸辉光: START 钮 ::after, 6s alternate, 色 --glow-accent (定义在 03-style-shell) */
+@keyframes glow-breathe{from{opacity:.35;}to{opacity:.75;}}
+@keyframes glow-breathe-dark{from{opacity:.25;}to{opacity:.6;}}
+/* M5 微摇: 卡堆容器, 7s ±6px ±1.25° (克制档, V4 同款参数) */
+@keyframes rock{from{transform:translateY(-6px) rotate(-1.25deg);}to{transform:translateY(6px) rotate(1.25deg);}}
+/* M6 非对称弹跳: 下落 240ms 加速 + 回弹 320ms 减速, 一次性 (复制成功勾)
+   (REVIEW-V5 建议-3: 死类 .bounce-in 已删, M6 仅经 .copy-btn.copied .ic-check 落地) */
+@keyframes bounce-down{from{transform:scale(.88) translateY(8px);}to{transform:scale(1) translateY(0);}}
+@keyframes bounce-up{from{transform:scale(1) translateY(0);}to{transform:scale(1) translateY(0);}}
+.copy-btn.copied .ic-check{animation:bounce-down 240ms cubic-bezier(.8,0,1,1),bounce-up 320ms cubic-bezier(0,0,.2,1);}
+/* M7 流光: 屏1 大标题 .hl 全站恰 1 处, 12s linear 缓流 (V5.4: 8s→12s, 慢而绵长更耐看), 双色渐变随主题 (定义在 04-style-screen) */
+@keyframes shimmer{from{background-position:0 0;}to{background-position:200% 0;}}
+/* M8 marquee: 不做 (无内容承载, 不硬凑 — UX-V5 §7 决策) */
+
+/* ===== 主题切换过渡门控 (V4 机制原样继承): 仅 .theme-anim 激活时过渡, 只 6 色属性, 零几何重排 ===== */
+html.theme-anim,
+html.theme-anim *,
+html.theme-anim *::before,
+html.theme-anim *::after{
+  transition:background-color 200ms ease,
+             color 200ms ease,
+             border-color 200ms ease,
+             outline-color 200ms ease,
+             fill 200ms ease,
+             stroke 200ms ease;
+}
+
+/* ===== reduced-motion 降级矩阵 (UX-V5 §8, 全动效无豁免, 11 项) =====
+   铁律: 入场类显式可见兜底 (opacity:1 + 终值 transform), 禁依赖全局规则兜 opacity:0 */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition-duration:0s !important;animation-duration:0s !important;animation-iteration-count:1 !important;}
+  /* 1. M1 屏切换: 瞬时 (无位移无交错) */
+  .screen.exiting > .screen-inner > *{opacity:0;transform:none;}
+  .screen.pre > .screen-inner > *{opacity:1;transform:none;}
+  /* 2. M1 胶囊滑动: 瞬时跳位 */
+  .pill-ind{transition:none !important;}
+  /* 3. M2 发牌入场: 直接扇形终位 (显式兜底, 不靠全局规则) */
+  .cardstack.dealing .tcard{animation:none;opacity:1;}
+  /* 4. M2 翻牌: 直切 (JS 走 reduce 分支, 此处兜住让位态) */
+  .tcard.flip-out{transition:none;opacity:0;}
+  /* 5. M3 星空: 单帧定格 (JS boot 判 matchMedia, 不启动 rAF) */
+  /* 6. M4 辉光: 静态中档 opacity .5 (V4.1 特异性教训: 双选择器压暗档覆盖) */
+  .btn-start::after{animation:none;opacity:.5;}
+  :root[data-theme="dark"] .btn-start::after{animation:none;opacity:.5;}
+  /* 7. M5 微摇: 静止 */
+  .cardstack{animation:none;transform:none;}
+  /* 8. M6 弹跳: 直接到位 */
+  .copy-btn.copied .ic-check{animation:none;}
+  /* 9. M7 流光: 静态双色渐变 (background-position 钉 0, 两端对比已实算 ≥3:1) */
+  .p-title .hl{animation:none;background-position:0 0;}
+  /* 10. 主题切换过渡: 0s 瞬时 (全局 !important 覆盖 theme-anim 门控) */
+  /* 11. 星空重着色: 瞬时换档 (JS reduce 分支跳过插值) */
+  .card-ghost{transition:none;}
+  /* ---- V5.1 新增 3 行 (§8): 定格帧含全部光效, 只是不动 ---- */
+  /* 12. slam 砸实: 不跑, 影层直接常驻值 (--slam-a 基础样式兜底, 防 0s+backwards 卡 opacity:0) */
+  .cardstack.dealing .tcard::before{animation:none;opacity:var(--slam-a,.12);}
+  /* 13. text-reveal: 不跑, 文字 α=1 静态全显 */
+  .cardstack.dealing .tc-face{animation:none;opacity:1;}
+  /* 14. 指针视差: 监听不挂 (13-star.js boot 判 matchMedia, 定格帧零偏移) */
+}

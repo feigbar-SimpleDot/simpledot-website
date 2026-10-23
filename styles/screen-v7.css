@@ -1,0 +1,245 @@
+/* ===== V7 屏2 设计细节与换牌动效 (UX-V7 §3.1~§5.5), 拆片降低片大小:
+   同目录外联, 加载序 04→04b 承接 CSS 上下文纪律;
+   本片 = sc-card 局部框内元素 (.sc-tags/sc-story/.sc-shot) + reduced-motion + 子态 outer/inner 锁定 + sc-rail 细节.
+   工程纪律: 04 片先开 style, 本片在前; 06-style-motion.css 收 style 兜底 (实已收). */
+.sc-rail .rail-star{width:12px;height:12px;color:currentColor;display:inline-block;vertical-align:middle;}
+.sc-rail button:not([aria-current="true"]) .rail-star{display:none;}     /* 仅激活行显示 (UX-V7 §3.3) */
+
+/* ===== V7 屏2 · 换牌动效 (UX-V7 §5.1~§5.3)
+   三卡根据 (i - active + 3) % 3 槽位 = 0/a, 1/b, 2/c;
+   顶卡入场 600ms (0,0,0.2,1) 60ms delay, 退场 480ms (0.8,0,1,1) 0 delay,
+   残影层重排 560ms (0.8,0,0.2,1) 0 delay;  总时长 60+600=660ms ∈[500,700] ✓. */
+.sc-stack.dealing{transition:height 300ms ease-out;}                    /* 换态堆高度对齐: JS 同步顶卡 offsetHeight */
+.sc-stack.dealing .sc-card{transition:transform 480ms cubic-bezier(0.8,0,1,1);}  /* 三卡统一退场曲线等待 .slot-* */
+.sc-stack.dealing .sc-card.slot-a{transition:transform 600ms cubic-bezier(0,0,0.2,1) 60ms;}  /* 新顶卡: 减速入场, 60ms 延迟让位退场 */
+.sc-stack.dealing .sc-card.slot-b,
+.sc-stack.dealing .sc-card.slot-c{transition:transform 560ms cubic-bezier(0.8,0,0.2,1);}  /* 残影层重排 */
+
+/* 内容可见性迟延 (UX-V7 §5.2 / §5.3 卡背时序, V7 fix-up D-V7-P0-1 口径):
+   静态态由 04 片 `.sc-card[aria-hidden=true] > *{visibility:hidden}` 兜底 (残影卡名不漏);
+   dealing 期间退场卡刚被置 aria-hidden, 走 visibility 离散过渡延迟 480ms 再隐
+   (扇出半程不露字, 时序值与原实现一致), 入场卡 0ms 即显;
+   子选择器由 :not(.sc-name) 扩为 `> *` (sc-name 一并延迟隐藏, 与静态口径一致)。 */
+.sc-stack.dealing .sc-card[aria-hidden="true"] > *{visibility:hidden;transition:visibility 0s 480ms;}
+.sc-stack.dealing .sc-card:not([aria-hidden="true"]) > *{visibility:visible;transition:visibility 0s;}
+
+/* reduced-motion (AC-V7-06): 槽位轮换直切 ≤50ms, 高亮条直跳 */
+@media (prefers-reduced-motion: reduce){
+  .sc-stack.dealing,
+  .sc-stack.dealing .sc-card{transition:none !important;}
+  .sc-rail .rail-ind{transition:none !important;}
+}
+
+/* ===== V7 屏2 375 上下结构回退 (UX-V7 §4) =====
+   375 横向编号 tab + 面板 + 竖向微堆残影, 预算 480/579 ✓ */
+@media (max-width:767px){
+  .sc-stage{gap:4px;}                               /* V7 R2 D-RT-P0-1: 6→4, en k0 预算回收 */
+  /* D-RT-P0-1 修复 (与 UX-V7 §4 线框对齐): 编号 tab 行置于面板之上。
+     根因 = .sc-stack 流内高 200 而顶卡 absolute 溢出 ~318px 盖死 rail (hit-test=sc-story),
+     且 JS 同步 minHeight 后 rail 被顶出视口 (en k0 rail bottom 667+)。
+     rail 先行后其位置与顶卡高解耦, 恒在视口且永不被盖。 */
+  .sc-rail{order:-1;}
+  /* (a) 案: 375 顶卡占流 (消除溢出源, scrollHeight=真实内容高);
+     slot-b/c 保持 absolute 残影。桌面/中档 ≥768 零触碰 (规则只在本 media 内)。
+     D-RT2-P0-1 修复: 不能纯 position:static —— 静态元素 + 数字 z-index 在 CSS 规则下退化为 auto,
+     会被同级 slot-b/c (absolute, z=2/z=1) 渲染在上盖住顶卡四件套。
+     改 position:relative + z-index:10: 仍在流内 (占流 + 残影上探无击穿), z-index 数字重新可生效,
+     让顶卡压在 slot-b/c 之上。dealing 窗内 `.sc-stack.dealing .sc-card{position:absolute}`
+     选择器更具体, 切牌期间三卡仍统一回 absolute, 几何由 transform 接管, 不回归。 */
+  .sc-card.slot-a{position:relative;z-index:10;}
+  /* V8 R3.4 修复: .sc-card[aria-hidden="true"]{pointer-events:none} 已上移至 screen.css 全局 (ARCH-V8 §5.4a) */
+  /* 换牌 .dealing 窗内三卡临时回 absolute: 轮换瞬间 relative 卡不参与, 几何全由 transform 接管;
+     stack 高由 12c 既有 stack.style.minHeight 同步撑住, dealing 结束 slot-a 落回 relative 同高无跳变 */
+  .sc-stack.dealing .sc-card{position:absolute;}
+  /* ===== D-RT-P0-1 高度预算收紧 (仅 375; 全为行高/间距/图框高, 字号一律不动):
+     可用 611 = padding 16 + chrome EN 81 + gap 4 + rail 48 + gap 4 + 顶卡 + 过冲 ~5 + padding
+     → 顶卡上限 ~453; en k0 基线 517.9 超预算 65px, 逐层回收:
+     name lh 1.15 (-7.7) / tags span lh:1 三行 (-20) / story lh 1.45 (-14) /
+     shot-body 100→82 (-18) / figcaption lh+padding (-4) / 卡衬 12→10 (-4) / 内衬 10→8 (-4) ===== */
+  .sc-rail{display:flex;gap:6px;padding:2px;background:var(--pill-track);border-radius:var(--radius-pill);
+    min-height:44px;}                                   /* UX-V7 §4 预算: tab 行 44 + 衬 4 ≈ 48, 钮 44 触控红线优先 */
+  .sc-rail .rail-ind{display:none;}             /* 375 直跳 (与 V6 D2 移动端静态纪律一致) */
+  .sc-rail button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;
+    /* V7 fix-up D-V7-P0-3: 触控目标 ≥44px (REQ §3.3.5 红线, UX-V7 §4 设计稿 44px),
+       min-height:44 与容器一致; 同时保证 480/579 行高预算不被破坏 (44 < 52 = 桌面 rail 行高) */
+    min-height:44px;height:44px;padding:0 8px;border-radius:var(--radius-pill);color:var(--pill-idle-fg);font-weight:500;font-size:13px;}
+  .sc-rail .rail-no{font-size:10px;}
+  .sc-rail button[aria-current="true"]{background:var(--pill-active-bg);color:var(--pill-active-fg);font-weight:700;}
+  /* 375 残影改为竖向微堆: 不向左平移 52px (D11 防 345 撑出), 倾角收为 -1.5deg;
+     transform-origin 显式回中心, 与 V7 实测通过的 375 微堆几何一致 (桌面底边原点不外溢到此档) */
+  :root{--sc-tilt:-1.5deg;}
+  .sc-card.slot-a{transform:rotate(var(--sc-tilt)) translate(0,0) scale(1);}
+  .sc-card.slot-b{transform-origin:50% 50%;transform:rotate(-1.5deg) translate(-6px,-10px) scale(.955);}
+  .sc-card.slot-c{transform-origin:50% 50%;transform:rotate(-2deg) translate(-6px,-18px) scale(.91);}
+  /* 375 标位: 顶卡 padding 收紧以贴预算 (保持不缩字号);
+     V7 fix-up D-V7-P0-3 连带: rail 钮 36→44 使 rail 行 44→48 (+4px),
+     卡上下衬 16→14 回收 4px, 375 EN 档各 k 恢复至基线水位;
+     V7 R2 D-RT-P0-1 再收: 上下衬 14→10 再回收 4px */
+  .sc-card{padding:10px 16px;}
+  .sc-tags{margin-bottom:6px;}
+  .sc-name{line-height:1.15;margin-bottom:4px;}
+  .sc-tags span{line-height:1;padding:2px 6px;}         /* EN 三行标签行盒收紧 (10px 字号不动) */
+  .sc-story{line-height:1.45;margin-bottom:6px;}        /* EN 六行故事回收 ~14px (15px 字号不动) */
+  .shot-body{height:82px;padding:10px;}                 /* 定高 100→82: 图框让位故事文本 (偏差登记 FIX-NOTES-V7-R2) */
+  .shot-frame figcaption{line-height:1.35;padding:7px 12px;}
+  #screen-scenarios .screen-inner{padding:8px 14px;}
+}
+
+/* ===== V10 多图切换控件 (.shot-ctrl) + 序号指示 (.shot-pager) + 版权行 (.shot-credit)
+   UX-V10 §2.3: 与屏1 .card-ctrl 共享变量族与 hover 时序, 不引入新 token; 控件族独立 ===== */
+.shot-group{position:relative;width:100%;height:100%;}
+.shot-group .sc-shot{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;background:var(--surface-card);}
+.shot-group .sc-shot[hidden]{display:none;}
+
+/* 序号指示 (右上, absolute 不占流) */
+.shot-pager{position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:8px;
+  padding:4px 10px;border-radius:var(--radius-pill);
+  background:rgba(255,255,255,.82);
+  color:var(--text-secondary);font-size:12px;line-height:1;
+  font-variant-numeric:tabular-nums;font-family:var(--font-mono);
+  pointer-events:none;backdrop-filter:saturate(140%) blur(6px);
+  transition:opacity .18s ease;}
+:root[data-theme="dark"] .shot-pager{background:rgba(20,22,28,.72);}
+.shot-pager-text{display:inline-flex;gap:1px;}
+.shot-pager-dots{display:inline-flex;gap:4px;}
+.shot-pager-dots .dot{width:5px;height:5px;border-radius:50%;
+  background:var(--border-strong);transition:background .18s ease;}
+.shot-pager-dots .dot.is-active{background:var(--accent);}
+.shot-pager[data-empty="true"]{display:none;}            /* 单图 feature 整块隐藏 (UX-V10 §2.4) */
+
+/* 图组切换按钮 (左下) — 描边升 text-secondary 保双档 ≥3:1 (AC-D01 实算见 IMPL-V10 §3) */
+.shot-ctrl{position:absolute;bottom:8px;left:10px;
+  width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:var(--radius-pill);border:1px solid var(--text-secondary);
+  background:rgba(255,255,255,.86);color:var(--text-secondary);
+  cursor:pointer;padding:0;transition:color .18s ease,border-color .18s ease,transform .18s ease;}
+:root[data-theme="dark"] .shot-ctrl{background:rgba(20,22,28,.76);}
+.shot-ctrl svg{width:14px;height:14px;}
+@media (hover:hover){.shot-ctrl:hover{color:var(--text-primary);border-color:var(--accent);transform:scale(1.06);}}
+.shot-ctrl:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.shot-ctrl[disabled]{opacity:.42;cursor:not-allowed;}
+@media (hover:hover){.shot-ctrl[disabled]:hover{transform:none;color:var(--text-secondary);border-color:var(--text-secondary);}}
+.shot-ctrl-next{left:50px;}                              /* 双钮并排 (375 档 64px 位, 见下方媒体查询) */
+/* 残影卡全局 pointer-events:none 继承 V8 R3.4 (screen.css 已兜底, 此处显式声明图组钮) */
+.sc-card[aria-hidden="true"] .shot-ctrl{pointer-events:none;}
+/* 换牌互斥窗 (RK4 精确选择器): 顶卡 dealing 期视觉锁; disabled/aria-busy 由 SAS_V10 JS 加 */
+.sc-stack.dealing .sc-card:not([aria-hidden="true"]) .shot-ctrl{pointer-events:none;opacity:.42;}
+.sc-stack.dealing .shot-pager{opacity:.42;}
+
+/* 375 触控红线: 32→44 */
+@media (max-width:767px){
+  .shot-ctrl{width:44px;height:44px;bottom:6px;left:6px;}
+  .shot-ctrl svg{width:16px;height:16px;}
+  .shot-ctrl-next{left:56px;}
+  .shot-pager{top:6px;right:6px;padding:5px 10px;font-size:12px;}
+}
+
+/* 版权行 (.shot-credit) — 仅 S4 渲染; 图说下方独立语义行 (UX-V10 D9) */
+.shot-credit{margin:6px 12px 0;padding-bottom:8px;font-size:12px;line-height:1.4;
+  color:var(--text-secondary);font-family:var(--font-mono);
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:0;}
+.shot-credit[hidden]{display:none;}
+.shot-credit-name{color:var(--text-primary);font-weight:600;}
+.shot-credit-sep{opacity:.55;padding:0 2px;}
+.shot-credit a{color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;
+  text-underline-offset:2px;word-break:break-all;}
+.shot-credit a:hover{text-decoration-thickness:2px;}
+.shot-credit a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
+@media (max-width:767px){
+  /* UX-V10 §5.3 方案 A: 单行 ellipsis, 预算侵占收在 ~15px 内 */
+  .shot-credit{margin:6px 8px 0;padding-bottom:6px;font-size:11px;line-height:1.35;
+    flex-wrap:nowrap;overflow:hidden;}
+  .shot-credit a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+}
+
+/* 无 JS 降级 (镜像屏1 .card-ctrl 范式, UX-V10 降级档 A) */
+html:not(.js) .shot-ctrl,
+html:not(.js) .shot-pager{display:none;}
+html:not(.js) .shot-group .sc-shot:not(:first-child){display:none;}
+html:not(.js) .shot-credit{display:none;}                /* 版权行依赖 JS 切 currentFor */
+
+/* ===== V10 第 4 feature: sc-rail 04 等宽纪律 (UX-V10 §4.1 / D8: 字号不动, 数字防撞) ===== */
+.sc-rail .rail-no{min-width:2ch;font-variant-numeric:tabular-nums;letter-spacing:0;}
+.sc-rail button{flex:1 1 0;min-width:0;}                 /* 4 等分兜底: 防 04 挤窄 (仅 375 flex 行生效) */
+@media (max-width:767px){
+  .sc-rail{gap:4px;padding:2px;}                         /* RK3 挤压兜底: 不缩数字, 收 gap 与内衬 */
+  .sc-rail button{padding:0 6px;font-size:12px;}
+  .sc-rail .rail-no{min-width:1.5ch;font-size:10px;}
+}
+
+/* ===== V10 第 4 张 sc-card: slot-d 待浮现层 (第 4 卡加入后三槽扩为四槽,
+   assignSlots 按卡数取模; slot-d = 最深残影, 隐于 slot-c 之后, 零可见几何变化) ===== */
+.sc-card.slot-d{z-index:0;height:200px;overflow:hidden;
+  transform:rotate(-14deg) translate(-70px,26px) scale(.87);}
+.sc-stack.dealing .sc-card.slot-d{transition:transform 560ms cubic-bezier(0.8,0,0.2,1);}  /* 与残影层同曲线 */
+@media (max-width:767px){
+  /* 375 竖向微堆 (D11 防左溢出纪律): slot-d 只上探不加横向位移 */
+  .sc-card.slot-d{transform-origin:50% 50%;transform:rotate(-2.5deg) translate(-6px,-26px) scale(.87);}
+}
+
+/* ============================================================
+   ===== V11 (UX-V11 §5.2): 灯箱触发锚点 .shot-zoom + hint chip + 单例灯箱 + 降级 ===== */
+.shot-body{position:relative;}                        /* ★ B1 根修: ctrl/pager 定位上下文收进图框内 (AC-G01) */
+.shot-zoom{position:absolute;inset:0;display:block;cursor:zoom-in;
+  border-radius:inherit;outline-offset:2px;}
+.shot-zoom[hidden]{display:none;}
+.shot-zoom .sc-shot{pointer-events:none;}             /* 命中一律落在 <a>, 无 img/a 双 hit-test 竞态 */
+.shot-zoom-hint{position:absolute;right:8px;bottom:8px;width:22px;height:22px;
+  display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-pill);
+  background:rgba(20,22,28,.55);color:#f5f1ea;opacity:.7;pointer-events:none;
+  transition:opacity .18s ease;}
+.shot-zoom-hint svg{width:12px;height:12px;}
+@media (hover:hover){.shot-zoom:hover .shot-zoom-hint{opacity:1;}}
+@media (max-width:767px){
+  .shot-zoom-hint{width:18px;height:18px;right:6px;bottom:6px;}
+  .shot-zoom-hint svg{width:10px;height:10px;}
+}
+
+/* ===== V11 灯箱 (固定深色面, 两主题恒同 = F8 同族手法) ===== */
+.lb{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;
+  background:rgba(12,10,8,.86);}                      /* #f5f1ea 文本 ≈12:1, 控件描边 ≈8:1, 双档同值 */
+.lb[hidden]{display:none;}
+@keyframes lb-fade{from{opacity:0}to{opacity:1}}
+.lb:not([hidden]){animation:lb-fade 120ms ease-out;}  /* ≤150ms (REQ §5.2) */
+.lb-backdrop{position:absolute;inset:0;}              /* 点遮罩关闭承接层 */
+.lb-panel{position:relative;display:flex;flex-direction:column;align-items:center;
+  gap:8px;padding:8px;max-width:100vw;}
+.lb-close{position:absolute;top:8px;right:8px;width:44px;height:44px;             /* 两档同 44 (AC-C06) */
+  display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-pill);
+  border:1px solid var(--border-strong);background:rgba(20,22,28,.6);color:#f5f1ea;
+  cursor:pointer;padding:0;transition:border-color .18s ease;}
+.lb-close svg{width:16px;height:16px;}
+@media (hover:hover){.lb-close:hover{border-color:#f5f1ea;}}
+.lb-close:focus-visible,.lb-opennew:focus-visible{outline:2px solid var(--accent-on-dark);outline-offset:2px;}
+.lb-img{max-width:min(1400px, calc(100vw - 32px));max-height:calc(100vh - 136px);
+  object-fit:contain;display:block;border-radius:var(--radius-sm);background:#14161c;}
+.lb-caption{margin:0;font-size:13px;line-height:1.45;color:#f5f1ea;
+  font-family:var(--font-mono);text-align:center;}
+.lb-opennew{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;
+  border-radius:var(--radius-pill);border:1px solid var(--border-strong);
+  color:#f5f1ea;font-size:12px;font-family:var(--font-mono);text-decoration:underline;
+  text-underline-offset:2px;}
+@media (max-width:767px){
+  .lb-img{max-width:calc(100vw - 16px);max-height:calc(100vh - 120px);}
+  .lb-caption{font-size:12px;padding:0 8px;}
+}
+
+/* ===== V11 降级 ===== */
+html:not(.js) .lb, html:not(.js) .shot-zoom-hint{display:none;}
+html:not(.js) .shot-zoom[hidden]{display:none;}       /* 无 JS 只显首图锚点 (V10 同效, 锚点级口径) */
+html[data-lb-open]{overflow:hidden;}                  /* 移动端 rubber-band 锁 */
+@media (prefers-reduced-motion: reduce){.lb:not([hidden]){animation:none;}}
+
+/* ===== V11 B2 回收杠杆 (375; UX-V11 §6.2 按序施加; 实测登记见 IMPL-V11 / FIX-V11B) ===== */
+@media (max-width:767px){
+  .shot-credit{margin:4px 8px 0;padding-bottom:0;}                    /* 杠杆2: −10px (S4) */
+  .shot-frame figcaption{line-height:1.3;padding:5px 10px;}           /* 杠杆3: −4px */
+  /* 杠杆4 (fix-v11b D-V11-2): 顶卡图框 82→64。V11 首轮以 flow 坐标 (offsetTop 系) 误判达标;
+     TEST-V11 以渲染 getBoundingClientRect 口径复测 375 EN S4 卡底 692.9 > 667 (tilt 旋转分量
+     不在 flow 坐标内), 施加本杠杆。几何边界: ctrl 44 + bottom 6 = 50 ≤ 64 不越框 (B1 口径)。 */
+  .sc-card.slot-a .shot-body{height:64px;}
+  /* §6.2 余项条款: 杠杆 2+3+4 后渲染 rect 复测 EN S4 卡底 674.9 仍差 7.9px (≤9px 窗口内),
+     按 V7 纪律仅收 S4 卡衬上下 padding (10→6, −8px, 不动字号/文本); 实测登记 FIX-V11B。 */
+  #sub-scenarios-3.sc-card{padding:6px 16px;}
+}
