@@ -1,10 +1,44 @@
 /* ===== V5 tokens: V4 全量继承 (值逐字节未动) + V5 新增 14 token 双档 (UX-V5 §2) =====
    对比度均经 WCAG 2.1 实算 (UX-V5 §2.2, 脚本存档可复跑); 裸色纪律: 全部色值集中在本片,
    03~06 样式片只允许 var() 引用 (grep hex 审计口径见 IMPL-NOTES-V5 §4) */
+
+/* ===== V13 门1 (issue #16 / R-V13-14): display 字族自托管 —— 方案 B (仅拉丁面) =====
+   实测 (fonts.googleapis.com css2 &text= 子集化, 标题真实字形集 = 三页 h1~h4 静态文
+   + i18n 两字典命中键并集; CJK 105 字 + 符号 6 = 111):
+     Noto Sans SC 700 CJK-only 子集 = 16612 B; 拉丁面 Space Grotesk 700 = 4168 B;
+     合计 20780 B > 18 KB 硬红线 (18432 B) → 按 R-V13-14 退方案 B:
+     仅拉丁 display 面自托管, 中文标题继续现有栈 (门 1 记「部分整改」)。
+   重跑子集: 完整 css2 &text= URL 模板见 docs/implementation-notes-v13-c.md
+   (woff2 URL 必须从 css2 响应现场解析, 手拼 gstatic 会 404; 仓库内保持零外链纪律)。
+   字形缺口红线: 本面只覆盖当前标题字形 (unicode-range 逐字节抄自 css2 响应);
+   后续标题文案新增拉丁字符须重跑子集, 缺字自动回落 fallback 栈。 */
+@font-face{
+  font-family:'SAS Display Grotesk';
+  font-style:normal;
+  font-weight:700;
+  font-display:swap;
+  src:url('../assets/fonts/space-grotesk-700.woff2') format('woff2');
+  unicode-range:U+20,U+28-29,U+2c-2d,U+2f,U+3f,U+41,U+43-44,U+46-49,U+4c-4d,U+4f,U+51,U+53-57,U+59,U+61-69,U+6b-77,U+79,U+2014,U+2460-2463,U+2605;
+}
+
+/* ===== V13 门74 (issue #16 / R-V13-18): accent 去 Tailwind indigo-500 出厂色 —— OKLCH 自推锚点 =====
+   推导 (脚本存档 docs/evidence-v13/impl-c-color.py, WCAG 实算同 §2.2 口径):
+   - 品牌锚: --brand-blue #1E90FF = hsl(209.6) / oklch(0.652 0.190 253.2), --brand-dot #1878D8
+     = hsl(210.0); 裁决记品牌 hue≈206°。出厂色 indigo-500 #4F46E5 = hsl(243.4) / oklch(0.511 0.230 277.0)。
+   - 新锚点: 品牌 hue 向蓝偏 +10.4° → hsl 220 (窗口 10-15° 内), 饱和度 75.4%→64.2% (收一档),
+     明度 45% 使 oklch L 0.492 压 indigo-500 的 0.511 半档 → accent = oklch(0.492 0.164 262.2)
+     = #295abc (OKLCH 色相 262.2 与品牌 253.2 差 9.0, 远离 277 出厂带)。
+   - 四档联动: hover = 同色相压暗 oklch(0.390 0.129 262.1) = #1b4089;
+     soft = 同色相浅染 oklch(0.96 0.015 262) = #ebf2ff; on-dark (恒深面用) = 暗档 accent #9bbeff。
+   - 暗档族: accent = oklch(0.800 0.100 262.4) = #9bbeff; hover = oklch(0.88 0.060 261) = #c6d8f9;
+     soft = oklch(0.28 0.05 262) = #1b2942 (对暗档 secondary 7.88:1 ≥ 旧 7.79)。
+   - 全表对比度新旧对照 = docs/evidence-v13/impl-c-contrast-table.txt, 0 项回退。
+   - 同族派生 rgba (glow/星点/辉光) alpha 不变, 仅换成新 accent 分量
+     (恒深面 --lb-* 与 --overlay-* 与 --qr-bg 不动, R-V13-24)。 */
 :root{
   --bg-page:#fbf9f6;
   --bg-warm:#f4efe8;
-  --bg-hero-grad:linear-gradient(165deg,#fdfcfa 0%,#f3eee6 55%,#ece9f7 100%);
+  --bg-hero-grad:linear-gradient(165deg,#fdfcfa 0%,#f3eee6 55%,#e7ecf7 100%);   /* 末点 V13 门74: 原 #ece9f7 indigo 底染改同族 azure */
   --bg-dark:#211d19;
   --bg-dark-2:#2b2621;
   --bg-code:#262019;
@@ -13,10 +47,10 @@
   --text-tertiary:#746c64;   /* P1-AA 修复: 亮档由 #8a8177(3.35:1 on warm) 同色相加深, 实算 4.51~4.91:1 */
   --text-inverse:#f5f1ea;
   --text-inverse-muted:#c9c0b4;
-  --accent:#4f46e5;
-  --accent-hover:#4338ca;
-  --accent-soft:#eef0fd;
-  --accent-on-dark:#a5b4fc;
+  --accent:#295abc;          /* V13 门74: OKLCH 自推锚点 (见片头推导注释), 替代 Tailwind indigo-500 出厂值 #4f46e5 */
+  --accent-hover:#1b4089;    /* 同族压暗档 (原 #4338ca = Tailwind indigo-700 出厂值) */
+  --accent-soft:#ebf2ff;     /* 同族浅染 (原 #eef0fd 为 indigo 底染) */
+  --accent-on-dark:#9bbeff;  /* 恒深面用 accent (原 #a5b4fc = Tailwind indigo-300 出厂值); 对深面板 8.38~9.65:1 ≥3 */
   --accent-warm:#b45309;
   --border:#e7e0d6;
   --border-strong:#cfc4b4;
@@ -45,9 +79,29 @@
   --radius-lg:16px;
   --radius-xl:24px;
   --radius-pill:999px;
+  /* ===== V13 门24b 间距 token (issue #17 / R-V13-15): 4px 阶梯 --space-1..--space-8 =====
+     sweep 映射表 (同值同档全库唯一, 等距 tie 一律向下取档, sweep 脚本存档
+     docs/evidence-v13/impl-e/sweep24b.py, 共 165 处机械替换):
+       3→4  5→4  6→4 | 7→8  9→8  10→8 | 14→12 | 18→16 | 22→20 | 26→24 | 34→32
+     既有同档值 4/8/12/16/20/24/28/32 一并 token 化 (门24a 同值字面清零纪律)。
+     保留字面 (lint ≤2px 豁免档, 非阶梯): 1px/2px 微距 17 处。
+     保留豁免 (光学值, R-V13-15 负 margin 不在 sweep 范围): cardstack.css 375 档
+       .tcard/.card-ghost margin:-90px 0 0 -140px (卡 280×180 居中光学值, 改动即偏心)。
+     门26b 驳回留痕 (R-V13-19, audit §四 实测驳回): 禁用态三通道齐全 =
+       视觉 opacity:.42 (screen-v7 .shot-ctrl[disabled]) + cursor:not-allowed +
+       hover 信号抑制 (:disabled:hover{transform:none;色不回涨});
+       JS 侧另写 aria-busy。lint :disabled 伪类未命中按驳回记, 非缺陷。 */
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-7:28px;
+  --space-8:32px;
   --shadow-soft:0 1px 2px rgba(28,26,23,.04),0 4px 12px rgba(28,26,23,.06);
   --shadow-lift:0 2px 4px rgba(28,26,23,.05),0 12px 32px rgba(28,26,23,.10);
-  --shadow-glow:0 8px 40px rgba(79,70,229,.12);
+  --shadow-glow:0 8px 40px rgba(41,90,188,.12);
   --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
   --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","Courier New",monospace;
   /* ---- v4 语义 token (UX-V4 §2.3 亮档值, 原样继承) ---- */
@@ -65,7 +119,7 @@
   --shot-icon:#b9ac9b;
   --shot-label:#6f6659;
   --shot-caption-bg:rgba(255,255,255,.5);
-  --glow-accent:rgba(79,70,229,.14);
+  --glow-accent:rgba(41,90,188,.14);   /* V13 门74: =新 accent (41,90,188), alpha 不变 */
   /* ---- V5 新增 14 token (UX-V5 §2.2 实算表, 亮档) ---- */
   --shell-h:64px;                                   /* 壳条高 = V6 header 实占高: 64 桌面 / 56 <1024 (移动 104 档随 C6 废除) */
   --shell-glass:rgba(251,249,246,.86);              /* 壳条毛玻璃底 */
@@ -81,7 +135,7 @@
   --screen-bg-translucent:rgba(244,239,232,.88);    /* [V6 deprecated] 旧屏2/3满屏阅读底 (星空遮挡元凶, ST2-a 删除引用); token 定义保留, 新结构零引用 */
   --scrim-band:rgba(251,249,246,.55);               /* V6 局部底带 (UX-V6 §6 ST2-b/§9): 只垫内容列, 四周星空直出; 星峰最坏点正文 15.24:1 PASS */
   --menu-veil:rgba(28,26,23,.30);                   /* V6 移动菜单遮罩底 (header 汉堡焦点圈闭配套) */
-  --font-display:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif; /* 展示角色=无衬线同栈 (UX-V5 §10, 衬线有意空置) */
+  --font-display:'SAS Display Grotesk',system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif; /* 展示角色: V13 门1 方案B 前置拉丁面 (CJK 继续现有栈, fallback 逐字节保持现值) */
   --stagger:40ms;                                   /* 屏切换交错级差 (n>5 屏兜底 32ms) */
   /* ---- V5.1 光与纵深 7 token 双档 (UX-POLISH-V5.1 §6, WCAG 实算全 PASS) ---- */
   --vignette:radial-gradient(ellipse 75% 65% at 50% 45%, transparent 55%, rgba(28,26,23,.05) 100%);
@@ -94,26 +148,37 @@
   --card-ambient:rgba(28,26,23,.10);                /* 主卡地影 (暖) */
   --star-glow-1:110,122,150;                        /* 亮星晕色 = star-1 同值 */
   --star-glow-2:110,122,150;                        /* V5.4 明星外晕扩散色 (slate) */
-  --stack-glow:rgba(79,70,229,.07);                 /* V5.4 卡堆后环境辉光 (亮档保守, 投影塑形哲学) */
+  --stack-glow:rgba(41,90,188,.07);                 /* V5.4 卡堆后环境辉光 (V13 门74 换 accent 分量, alpha 不变) */                 /* V5.4 卡堆后环境辉光 (亮档保守, 投影塑形哲学) */
   /* ---- V7 屏2 新增 3 token (UX-V7 §7.1; 走 token 双档, 散裸色=0) ---- */
   --sc-border-grad:linear-gradient(115deg,#b8506c 0%,#9c6212 48%,#2e7fa6 100%); /* 大卡 2px 渐变描边 (粉→黄→青, 亮档压深档) */
   --sc-tilt:-2.5deg;                                 /* 屏2 面板倾角 (<768 覆盖 -1.5deg) */
   --rail-y:0px;                                      /* 右栏高亮条 translateY 偏移 (JS 写, 600ms 缓动) */
+  /* ---- V13 门48 提色 (issue #14 / R-V13-11): V11 灯箱/pager 批次 14 处裸色入 token 双档。
+     恒深色面 (hint/lb/qr) 暗档同值重申, 纯 token 化, 色值逐字节与 V12 相同 ---- */
+  --overlay-pager-bg:#ffffff;                         /* pager 序号指示底 (screen-v7 .shot-pager); V13 门18 毛玻璃→实心 (门29 glass): 原 rgba(255,255,255,.82)+blur → 不透明白, 分层靠明度+描边 */
+  --overlay-ctrl-bg:rgba(255,255,255,.86);           /* 图组切换钮底 (screen-v7 .shot-ctrl) */
+  --overlay-hint-bg:rgba(20,22,28,.55);              /* 放大提示 chip 底 (恒深) */
+  --overlay-hint-fg:var(--text-inverse);             /* 放大提示图标色 = #f5f1ea (恒深 chip 面) */
+  --lb-bg:rgba(12,10,8,.86);                         /* 灯箱遮罩底 (恒深, #f5f1ea 文本 ≈12:1) */
+  --lb-ctrl-bg:rgba(20,22,28,.6);                    /* 灯箱关闭钮底 (恒深) */
+  --lb-fg:var(--text-inverse);                       /* 灯箱文本/hover 描边 = #f5f1ea (固定深色面, 两档同值) */
+  --lb-img-bg:#14161c;                               /* 灯箱图片垫底 (恒深) */
+  --qr-bg:#fbf9f6;                                   /* 联系二维码占位底 (QR 图恒深上浅底, 两档同值) */
 }
 /* ===== V5 暗档覆盖 (UX-V4 §2.2 继承 + UX-V5 §2.2 新增暗值, 全部实算 PASS) ===== */
 :root[data-theme="dark"]{
   --bg-page:#0f0e10;   /* V5.3: 暖棕#14110e→深中性黑, 与星空冷调协调不割裂; 全部暗档文字对比度对新底复算全 PASS (见 FIX-NOTES-V5.3 §3) */
   --bg-warm:#1c1815;
-  --bg-hero-grad:linear-gradient(165deg,#191612 0%,#1b1917 55%,#1a1a24 100%);
+  --bg-hero-grad:linear-gradient(165deg,#191612 0%,#1b1917 55%,#18202c 100%);   /* 末点 V13 门74: 原 #1a1a24 indigo 底染改同族 azure */
   --bg-dark:#1f1b17;
   --bg-dark-2:#272119;
   --bg-code:#1a1611;
   --text-primary:#f4efe6;
   --text-secondary:#c6bdb0;
   --text-tertiary:#9a9083;
-  --accent:#a5b4fc;
-  --accent-hover:#c7d2fe;
-  --accent-soft:#262647;
+  --accent:#9bbeff;            /* V13 门74 暗档同族 (原 #a5b4fc); vs dark page 10.27:1 ≥ 旧 9.66 */
+  --accent-hover:#c6d8f9;      /* 暗档 hover (原 #c7d2fe); vs dark page 13.38:1 ≥ 旧 12.91 */
+  --accent-soft:#1b2942;       /* 暗档浅染 (原 #262647); secondary 7.84:1 ≥ 旧 7.79 */
   --accent-warm:#f2a35c;
   --border:#332c25;
   --border-strong:#7a6853;
@@ -141,7 +206,7 @@
   --shot-icon:#6b6154;
   --shot-label:#c9c0b4;
   --shot-caption-bg:rgba(0,0,0,.25);
-  --glow-accent:rgba(165,180,252,.16);
+  --glow-accent:rgba(155,190,255,.16);
   /* V5 新增 token 暗档值 */
   --shell-glass:rgba(20,17,14,.82);
   --pill-track:rgba(245,241,234,.08);
@@ -152,7 +217,7 @@
   --card-edge:rgba(245,241,234,.18);                /* 装饰豁免 */
   --card-ghost-edge:rgba(245,241,234,.12);          /* 装饰豁免 */
   --star-1:244,239,230;                             /* 暗档暖白星 (峰值 α .22, 星上正文 8.73:1) */
-  --star-2:165,180,252;                             /* 暗档点缀星 =accent (峰值 α .22, 星上正文 10.59:1) */
+  --star-2:155,190,255;                             /* 暗档点缀星 =accent (峰值 α .22, 星上正文 10.59:1) */
   --screen-bg-translucent:rgba(28,24,21,.88);       /* [V6 deprecated] 同亮档: 保留定义, 新结构零引用 */
   --scrim-band:rgba(15,14,16,.45);                  /* V6 局部底带暗档 (UX-V6 §9): 星峰最坏点正文 12.60:1 PASS */
   --menu-veil:rgba(0,0,0,.5);                       /* V6 移动菜单遮罩底 (暗档) */
@@ -160,15 +225,25 @@
   --vignette:radial-gradient(ellipse 75% 65% at 50% 45%, transparent 50%, rgba(0,0,0,.45) 100%);
   --card-shadow-1:0 3px 12px rgba(0,0,0,.42);
   --card-shadow-2:0 10px 26px rgba(0,0,0,.58);
-  --card-shadow-3:0 20px 52px rgba(0,0,0,.72),0 0 32px rgba(165,180,252,.14);  /* 顶卡: 黑压 + accent 外发光 (§3.3, V5.4 加强) */
+  --card-shadow-3:0 20px 52px rgba(0,0,0,.72),0 2px 20px rgba(155,190,255,.14);  /* 顶卡: 黑压 + accent 外发光 (§3.3, V5.4 加强); V13 门29 (R-V13-19): 暗主题保留两处定点 bloom, bloom 带 2px 偏移 + blur 收 20px (零偏移彩色大辉光 = 门29 命中面), 亮档值本就是带偏移中性投影不动 */
   --card-shadow-lift:0 28px 60px rgba(0,0,0,.60);  /* hover 抬升态 (§3.4/§7 双伪元素交叉淡入, V5.4 加深) */
   --card-rim:inset 0 1px 0 rgba(245,241,234,.55), inset 1px 0 0 rgba(245,241,234,.25);  /* V5.4 rim α0.5++ (暗=发光塑形, 1px 缘高光不涉正文 AA) */
-  --card-ambient:rgba(165,180,252,.14);             /* 主卡 accent 辉光 */
+  --card-ambient:rgba(155,190,255,.14);             /* 主卡 accent 辉光 */
   --star-glow-1:244,239,230;                        /* 暗档亮星晕色 = 暖白 */
   --star-glow-2:110,122,150;                        /* V5.4 明星外晕扩散色 (slate, 文字交叠区 AA 实算档) */
-  --stack-glow:rgba(165,180,252,.15);               /* V5.4 卡堆后环境辉光 (accent 径向, 卡区间上沿; 落底 AA: primary 12.9 / secondary 8.0 / tertiary 4.7 全 PASS) */
+  --stack-glow:rgba(155,190,255,.15);               /* V5.4 卡堆后环境辉光 (accent 径向, 卡区间上沿; 落底 AA: primary 12.9 / secondary 8.0 / tertiary 4.7 全 PASS) */
   /* ---- V7 屏2 token 暗档值 (与亮档同几何, 描边三色整体提亮但 vs page ≥4.25/对星峰 ≥3.9 全 PASS) ---- */
   --sc-border-grad:linear-gradient(115deg,#ff8fa3 0%,#ffd9a0 48%,#9fe8ff 100%); /* 暗档渐变提亮一档 */
+  /* V13 门48 暗档值 (issue #14): pager/ctrl 取原 per-rule 暗值; hint/lb/qr 恒深面同值重申 (双档纪律, R-V13-11) */
+  --overlay-pager-bg:#14161c;             /* V13 门18 毛玻璃→实心: 原 rgba(20,22,28,.72) → 不透明深黑 (与 --lb-img-bg 同深色面族), 分层靠明度差+描边 */
+  --overlay-ctrl-bg:rgba(20,22,28,.76);              /* 原 :root[data-theme=dark] .shot-ctrl 规则值, 逐字节同 */
+  --overlay-hint-bg:rgba(20,22,28,.55);
+  --overlay-hint-fg:var(--text-inverse);             /* = #f5f1ea, 两档同值 */
+  --lb-bg:rgba(12,10,8,.86);                         /* 固定深色面, 两档同值 */
+  --lb-ctrl-bg:rgba(20,22,28,.6);
+  --lb-fg:var(--text-inverse);                       /* = #f5f1ea, 两档同值 */
+  --lb-img-bg:#14161c;
+  --qr-bg:#fbf9f6;                                   /* QR 占位底两档同值 (深上浅底保可扫) */
 }
 html.i18n-pending [data-i18n]{visibility:hidden;}
 /* 无 JS: canvas 不显示, 防空白占位 (UX-V5 降级三件套之一) */

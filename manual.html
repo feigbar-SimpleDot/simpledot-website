@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="manp.title">使用手册 · Simple-Dot Agent Studio</title>
+<meta name="description" data-i18n-attr="content:manp.desc" content="Simple-Dot Agent Studio 使用手册：worker 配置与协作 how-to。">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<!-- V12 独立静态页 (UX-V12 §4): tokens/shell 复用主站, pages 为两新页专属片; index 专属片不引 (D1) -->
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/shell.css">
+<link rel="stylesheet" href="styles/pages.css">
+<!-- i18n boot: 原样复制 index.html 同名内联段 (sas-lang 同键 = AC-E03 跨页一致) -->
+<script>
+(function(){
+  var l; try { l = localStorage.getItem('sas-lang'); } catch(e) {}
+  if (l !== 'zh' && l !== 'en')
+    l = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  var d = document.documentElement;
+  d.setAttribute('lang', l === 'zh' ? 'zh-CN' : 'en');
+  d.setAttribute('data-lang', l);
+  if (l !== 'zh') d.classList.add('i18n-pending');
+  d.classList.add('js'); // 脚本可用标记: 无 JS 走正文直出 + 复制钮隐藏降级 (UX-V12 AC-C04)
+})();
+</script>
+<!-- theme boot: 原样复制 index.html 同名内联段 (sas-theme 同键) -->
+<meta name="theme-color" content="#fbf9f6">
+<script>
+(function(){
+  var t; try { t = localStorage.getItem('sas-theme'); } catch(e) {}
+  if (t !== 'light' && t !== 'dark')
+    t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  var d = document.documentElement;
+  d.setAttribute('data-theme', t);
+  var mc = document.querySelector('meta[name="theme-color"]');
+  if (mc) mc.setAttribute('content', t === 'dark' ? '#0f0e10' : '#fbf9f6');
+})();
+</script>
+<script defer src="scripts/i18n.js"></script>
+<script defer src="scripts/i18n-en.js"></script>
+<script defer src="scripts/pages.js"></script>
+<script defer src="scripts/logo.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main" data-i18n="a11y.skip">跳到主内容</a>
+<!-- ===== V12 新页页头 (UX-V12 §5.4): 品牌回程 index.html#start + FAQ/手册互链 + README/GitHub + 主题 + 语言 ===== -->
+<header class="site-header">
+  <a class="shell-brand" href="index.html#start" aria-label="Simple-Dot Agent Studio">
+    <canvas class="logo-mark" data-logo="light" data-size="32" aria-hidden="true"></canvas>
+    <noscript><img width="32" height="32" alt="" aria-hidden="true" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5.4' fill='none' stroke='%23343A40' stroke-width='1.7'/%3E%3Ccircle cx='3.9' cy='3.9' r='1.35' fill='%231E90FF'/%3E%3Ccircle cx='4.0' cy='12.0' r='1.2' fill='%231E90FF'/%3E%3Ccircle cx='10.0' cy='10.0' r='1.8' fill='%231E90FF'/%3E%3C/svg%3E"></noscript>
+    <span class="logo-word">Simple-Dot Agent Studio</span>
+  </a>
+  <div class="shell-spacer"></div>
+  <nav class="nav-links" aria-label="文档页导航" data-i18n-attr="aria-label:pill.aria">
+    <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+    <a href="manual.html" class="is-active" aria-current="page" data-i18n="nav.manual">使用手册</a>
+  </nav>
+  <span class="mtag" aria-hidden="true">│</span>
+  <nav class="nav-ext" aria-label="外链">
+    <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank" class="wordmark">README</a>
+    <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+  </nav>
+  <div class="shell-actions">
+    <button type="button" class="icon-btn theme-toggle" aria-pressed="false" data-i18n-attr="aria-label:theme.toggle" aria-label="切换主题">
+      <svg class="ic-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="ic-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    </button>
+    <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.switch" aria-label="切换语言">
+      <button type="button" data-lang-btn="zh" aria-checked="true">中</button>
+      <button type="button" data-lang-btn="en" aria-checked="false">EN</button>
+    </div>
+  </div>
+  <button type="button" class="hamburger" aria-expanded="false" aria-controls="mobileMenu" data-i18n-attr="aria-label:a11y.menu" aria-label="菜单">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+</header>
+<div class="menu-overlay" id="menuOverlay"></div>
+<nav class="mobile-menu" id="mobileMenu" data-i18n-attr="aria-label:a11y.nav.mobile" aria-label="移动端导航">
+  <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+  <a href="manual.html" class="is-active" aria-current="page" data-i18n="nav.manual">使用手册</a>
+  <a href="index.html#start" data-i18n="nav.screen.start">快速开始</a>
+  <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank" class="wordmark">README</a>
+  <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+  <div class="mm-row">
+    <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.switch" aria-label="切换语言">
+      <button type="button" data-lang-btn="zh" aria-checked="true">中</button>
+      <button type="button" data-lang-btn="en" aria-checked="false">EN</button>
+    </div>
+  </div>
+  <div class="mm-row">
+    <button type="button" class="icon-btn theme-toggle" aria-pressed="false" data-i18n-attr="aria-label:theme.toggle" aria-label="切换主题">
+      <svg class="ic-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="ic-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    </button>
+  </div>
+</nav>
+<!-- 双栏 (UX-V12 §4.1): ≥1024 左 sticky TOC + 右正文; ≤1023 TOC 折叠 <details> (markup 带 open = 无 JS 常开可读) -->
+<main id="main" class="page page--two-col" tabindex="-1">
+  <nav class="man-toc" aria-label="手册目录" data-i18n-attr="aria-label:manp.toc.aria">
+    <details open>
+      <summary><span data-i18n="manp.toc.title">目录</span></summary>
+      <ul>
+        <li class="man-toc-cat"><span data-i18n="manp.cat.setup">Worker 配置 / Worker setup</span>
+          <ul>
+            <li><a href="#compression-model" data-i18n="manp.entry1.title">如何快速为 worker 添加压缩模型</a></li>
+            <li><a href="#worker-boundaries" data-i18n="manp.entry2.title">如何快速为所有 worker 明确工作边界</a></li>
+          </ul>
+        </li>
+        <li class="man-toc-cat"><span data-i18n="manp.cat.effort">角色 Effort 配置 / Role effort setup</span>
+          <ul>
+            <li><a href="#role-effort" data-i18n="manp.entry3.title">如何为不同的角色选择 effort 等级</a></li>
+          </ul>
+        </li>
+      </ul>
+    </details>
+  </nav>
+  <article class="man-body">
+    <div class="page-head">
+      <h1 data-i18n="manp.h1">使用手册</h1>
+      <p class="page-sub" data-i18n="manp.sub">运维与协作 how-to，持续补充。</p>
+    </div>
+    <!-- 种子内容 (UX-V12 §4.4 逐字符保真台账): = issue #11 两评论原文 (docs-source/ISSUES-V12.md),
+         命令本体不进 i18n (双语逐字节一致, REQ-v15 §2 裁决); V15 起 entry1 代码块注释与占位符值、
+         entry2 .man-quote 引用内容经 manp.entry1.code / manp.entry2.quote 双语成对键, DOM 直出为 ZH 兜底;
+         新分类 = 新 .man-cat 块 + TOC 一项 (AC-B03) -->
+    <section class="man-cat" id="cat-setup">
+      <h2 data-i18n="manp.cat.setup">Worker 配置 / Worker setup</h2>
+      <article class="man-entry" id="compression-model">
+        <h3 data-i18n="manp.entry1.title">如何快速为 worker 添加压缩模型</h3>
+        <p data-i18n="manp.entry1.lead">在宿主机依次执行以下四条命令（示例容器名 hermes_coder）：</p>
+        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code data-i18n="manp.entry1.code">docker exec hermes_coder  hermes config set auxiliary.compression.base_url 'http://127.0.0.1:1234/v1'
+docker exec hermes_coder hermes config set auxiliary.compression.model '你的模型名' # 有空格时用引号括起来，
+docker exec hermes_coder hermes config set auxiliary.compression.api_key 'sk-xxx'   # 或任意本地服务要求的 key，不需要时可以不加，点号 . 在 key 里要转义
+docker exec hermes_coder hermes config set auxiliary.compression.reasoning_effort none # 压缩模型不需要太强的思考，none关闭或者low就行</code></pre></div>
+      </article>
+      <article class="man-entry" id="worker-boundaries">
+        <h3 data-i18n="manp.entry2.title">如何快速为所有 worker 明确工作边界</h3>
+        <p data-i18n="manp.entry2.lead">在 main 中发送下面这条信息，即可驱动所有 worker 完成自我审查和优化：</p>
+        <div class="man-quote"><p data-i18n-html="manp.entry2.quote">我现在要求你根据当前worker的配置（简介，能力边界），清晰划分每个worker的任务边界和能力边界，然后通知各个worker严格检查自己的SOUL和skill是否满足，如果有越界的可能，必须立刻进行修正。（注意，边界仅在team work任务中生效）。<br>你可以通过api直接给worker发送明确的通知要求，并且，请串行分发，而不是并行。知道所有worker完成检查和修正。</p></div>
+      </article>
+    </section>
+    <!-- V14 新分类 (issue #11 评论 683 / TRIAGE §3): 新 .man-cat 块 + TOC 一项 (AC-B03);
+         档位/角色/Effort 名为双语同形 DOM 直出, 译文文本走 manp.entry3.* i18n 成对键;
+         三条逐字锚点: 安装命令 / 插件仓库链接 / /hae auto 指令 -->
+    <section class="man-cat" id="cat-effort">
+      <h2 data-i18n="manp.cat.effort">角色 Effort 配置 / Role effort setup</h2>
+      <article class="man-entry" id="role-effort">
+        <h3 data-i18n="manp.entry3.title">如何为不同的角色选择 effort 等级</h3>
+        <p data-i18n="manp.entry3.lead">根据前面的 full-dev-lifecycle 流程和角色定义，模型 effort（推理强度/思考预算）建议按任务的决策权重、复杂度和风险分成三档：</p>
+        <div class="man-tablewrap">
+          <table class="man-table">
+            <thead><tr><th data-i18n="manp.entry3.th.tier">档位</th><th data-i18n="manp.entry3.th.meaning">含义</th></tr></thead>
+            <tbody>
+              <tr><td>High</td><td data-i18n="manp.entry3.tier.high">需要深度推理、多约束权衡、决策影响大</td></tr>
+              <tr><td>Medium</td><td data-i18n="manp.entry3.tier.medium">结构化执行 + 适度判断</td></tr>
+              <tr><td>Low</td><td data-i18n="manp.entry3.tier.low">规则/清单驱动，歧义低</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4 data-i18n="manp.entry3.h.roles">各角色推荐 Effort</h4>
+        <div class="man-tablewrap">
+          <table class="man-table">
+            <thead><tr><th data-i18n="manp.entry3.th.role">角色</th><th data-i18n="manp.entry3.th.effort">推荐 Effort</th><th data-i18n="manp.entry3.th.why">理由</th></tr></thead>
+            <tbody>
+              <tr><td>Product Manager</td><td>High</td><td data-i18n="manp.entry3.r1">需求梳理、范围与优先级直接决定后续所有步骤，决策成本最高</td></tr>
+              <tr><td>Interaction Designer</td><td>Medium–High</td><td data-i18n="manp.entry3.r2">需要同理心与创造性，但仍有较清晰的输入约束</td></tr>
+              <tr><td>System Architect</td><td>High</td><td data-i18n="manp.entry3.r3">技术方案、模块边界、接口是系统级决策，错误代价极高</td></tr>
+              <tr><td>Development Engineer</td><td>Medium–High</td><td data-i18n="manp.entry3.r4">编码本身是执行型，但复杂逻辑、边界与可维护性仍需较强推理</td></tr>
+              <tr><td>Test Engineer</td><td>Medium</td><td data-i18n="manp.entry3.r5">测试设计有结构，重点在覆盖与验证，常规用中档即可</td></tr>
+              <tr><td>Code Reviewer</td><td>High</td><td data-i18n="manp.entry3.r6">必须站在更高视角检查质量、安全与设计一致性，强制换人</td></tr>
+              <tr><td>Document Auditor</td><td>Low–Medium</td><td data-i18n="manp.entry3.r7">主要是对照检查同步性，规则明确，低档足够</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4 data-i18n="manp.entry3.h.plan">落地建议</h4>
+        <ol class="man-list">
+          <li>
+            <p data-i18n="manp.entry3.plan1">默认配置（可直接写入 worker registry）：</p>
+            <ul>
+              <li data-i18n="manp.entry3.plan.hi">High：Product Manager、System Architect、Code Reviewer</li>
+              <li data-i18n="manp.entry3.plan.medhigh">Medium–High：Interaction Designer、Development Engineer</li>
+              <li data-i18n="manp.entry3.plan.med">Medium：Test Engineer</li>
+              <li data-i18n="manp.entry3.plan.lowmed">Low–Medium：Document Auditor</li>
+            </ul>
+          </li>
+          <li>
+            <p data-i18n="manp.entry3.plan2">动态调整：</p>
+            <ul>
+              <li data-i18n="manp.entry3.plan.hotfix">hotfix / typo / config_change → 整体下调一档</li>
+              <li data-i18n="manp.entry3.plan.loops">出现 loops 回流（测试/审查失败）→ 相关角色临时升到 High</li>
+              <li data-i18n="manp.entry3.plan.core">核心业务或高安全模块 → Architect + Reviewer 强制 High</li>
+            </ul>
+          </li>
+        </ol>
+        <p data-i18n="manp.entry3.closing">这样分配能让高决策密度的步骤获得足够推理深度，同时避免在低风险步骤上浪费算力。</p>
+        <p><span data-i18n="manp.entry3.plug1">Hermes Agent 官方提供了插件 hermes-adaptive-effort：安装并启用该插件，重启 Hermes，使用</span> <code>/hae auto</code> <span data-i18n="manp.entry3.plug1b">开启。</span></p>
+        <p data-i18n="manp.entry3.plug3">开启后，插件会用独立的 scorer 自动评估当前任务需要多少 reasoning，再动态选择 effort。Desktop 安装源里也已经把这个插件加进了 catalog。</p>
+        <p data-i18n="manp.entry3.plug4">在 worker 对应的 docker 中运行以下命令即可一键安装并启用：</p>
+        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code>hermes plugins install 'atostivint/hermes-adaptive-effort' --enable</code></pre></div>
+        <p><span data-i18n="manp.entry3.plug5">但使用前还需要配置一个决策模型，具体请查看：</span> <a href="https://github.com/atostivint/hermes-adaptive-effort" rel="noopener" target="_blank">hermes-adaptive-effort ↗</a></p>
+      </article>
+    </section>
+    <p class="man-foot"><span data-i18n="manp.foot">部署与快速上手见</span> <a href="index.html#start"><span data-i18n="nav.screen.start">快速开始</span> ↗</a></p>
+    <footer class="ft-strip">
+      <span class="ft-copy">© 2026 Simple-Dot Agent Studio</span>
+      <a href="https://www.simple-dot.com" rel="noopener" target="_blank" data-i18n-attr="aria-label:ft.site" aria-label="官网">www.simple-dot.com</a>
+      <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank" class="wordmark">README</a>
+      <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+    </footer>
+  </article>
+</main>
+<div class="live-region sr-only" aria-live="polite" id="liveRegion"></div>
+</body>
+</html>

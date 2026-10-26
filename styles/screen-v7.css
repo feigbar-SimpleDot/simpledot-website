@@ -9,8 +9,9 @@
    三卡根据 (i - active + 3) % 3 槽位 = 0/a, 1/b, 2/c;
    顶卡入场 600ms (0,0,0.2,1) 60ms delay, 退场 480ms (0.8,0,1,1) 0 delay,
    残影层重排 560ms (0.8,0,0.2,1) 0 delay;  总时长 60+600=660ms ∈[500,700] ✓. */
-.sc-stack.dealing{transition:height 300ms ease-out;}                    /* 换态堆高度对齐: JS 同步顶卡 offsetHeight */
 .sc-stack.dealing .sc-card{transition:transform 480ms cubic-bezier(0.8,0,1,1);}  /* 三卡统一退场曲线等待 .slot-* */
+/* V13 门10a (R-V13-9): 原 `.sc-stack.dealing{transition:height 300ms}` 已删 ——
+   JS 同步顶卡 offsetHeight 直接落定, 每帧 height 过渡触发重排; dealing 期间高度瞬变可接受 (实测不跳版) */
 .sc-stack.dealing .sc-card.slot-a{transition:transform 600ms cubic-bezier(0,0,0.2,1) 60ms;}  /* 新顶卡: 减速入场, 60ms 延迟让位退场 */
 .sc-stack.dealing .sc-card.slot-b,
 .sc-stack.dealing .sc-card.slot-c{transition:transform 560ms cubic-bezier(0.8,0,0.2,1);}  /* 残影层重排 */
@@ -33,7 +34,7 @@
 /* ===== V7 屏2 375 上下结构回退 (UX-V7 §4) =====
    375 横向编号 tab + 面板 + 竖向微堆残影, 预算 480/579 ✓ */
 @media (max-width:767px){
-  .sc-stage{gap:4px;}                               /* V7 R2 D-RT-P0-1: 6→4, en k0 预算回收 */
+  .sc-stage{gap:var(--space-1);}                               /* V7 R2 D-RT-P0-1: 6→4, en k0 预算回收 */
   /* D-RT-P0-1 修复 (与 UX-V7 §4 线框对齐): 编号 tab 行置于面板之上。
      根因 = .sc-stack 流内高 200 而顶卡 absolute 溢出 ~318px 盖死 rail (hit-test=sc-story),
      且 JS 同步 minHeight 后 rail 被顶出视口 (en k0 rail bottom 667+)。
@@ -56,13 +57,13 @@
      → 顶卡上限 ~453; en k0 基线 517.9 超预算 65px, 逐层回收:
      name lh 1.15 (-7.7) / tags span lh:1 三行 (-20) / story lh 1.45 (-14) /
      shot-body 100→82 (-18) / figcaption lh+padding (-4) / 卡衬 12→10 (-4) / 内衬 10→8 (-4) ===== */
-  .sc-rail{display:flex;gap:6px;padding:2px;background:var(--pill-track);border-radius:var(--radius-pill);
+  .sc-rail{display:flex;gap:var(--space-1);padding:2px;background:var(--pill-track);border-radius:var(--radius-lg);   /* V13 F7: 375 tab 轨道容器 pill→卡片圆角 (rail 钮保留 pill) */
     min-height:44px;}                                   /* UX-V7 §4 预算: tab 行 44 + 衬 4 ≈ 48, 钮 44 触控红线优先 */
   .sc-rail .rail-ind{display:none;}             /* 375 直跳 (与 V6 D2 移动端静态纪律一致) */
-  .sc-rail button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;
+  .sc-rail button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:var(--space-1);
     /* V7 fix-up D-V7-P0-3: 触控目标 ≥44px (REQ §3.3.5 红线, UX-V7 §4 设计稿 44px),
        min-height:44 与容器一致; 同时保证 480/579 行高预算不被破坏 (44 < 52 = 桌面 rail 行高) */
-    min-height:44px;height:44px;padding:0 8px;border-radius:var(--radius-pill);color:var(--pill-idle-fg);font-weight:500;font-size:13px;}
+    min-height:44px;height:44px;padding:0 var(--space-2);border-radius:var(--radius-pill);color:var(--pill-idle-fg);font-weight:500;font-size:13px;}
   .sc-rail .rail-no{font-size:10px;}
   .sc-rail button[aria-current="true"]{background:var(--pill-active-bg);color:var(--pill-active-fg);font-weight:700;}
   /* 375 残影改为竖向微堆: 不向左平移 52px (D11 防 345 撑出), 倾角收为 -1.5deg;
@@ -75,14 +76,12 @@
      V7 fix-up D-V7-P0-3 连带: rail 钮 36→44 使 rail 行 44→48 (+4px),
      卡上下衬 16→14 回收 4px, 375 EN 档各 k 恢复至基线水位;
      V7 R2 D-RT-P0-1 再收: 上下衬 14→10 再回收 4px */
-  .sc-card{padding:10px 16px;}
-  .sc-tags{margin-bottom:6px;}
-  .sc-name{line-height:1.15;margin-bottom:4px;}
-  .sc-tags span{line-height:1;padding:2px 6px;}         /* EN 三行标签行盒收紧 (10px 字号不动) */
-  .sc-story{line-height:1.45;margin-bottom:6px;}        /* EN 六行故事回收 ~14px (15px 字号不动) */
-  .shot-body{height:82px;padding:10px;}                 /* 定高 100→82: 图框让位故事文本 (偏差登记 FIX-NOTES-V7-R2) */
-  .shot-frame figcaption{line-height:1.35;padding:7px 12px;}
-  #screen-scenarios .screen-inner{padding:8px 14px;}
+  .sc-card{padding:var(--space-2) var(--space-4);}
+  .sc-name{line-height:1.15;margin-bottom:var(--space-1);}
+  .sc-story{line-height:1.45;margin-bottom:var(--space-1);}        /* EN 六行故事回收 ~14px (15px 字号不动) */
+  .shot-body{height:82px;padding:var(--space-2);}                 /* 定高 100→82: 图框让位故事文本 (偏差登记 FIX-NOTES-V7-R2) */
+  .shot-frame figcaption{line-height:1.35;padding:var(--space-2) var(--space-3);}
+  #screen-scenarios .screen-inner{padding:var(--space-2) var(--space-3);}
 }
 
 /* ===== V10 多图切换控件 (.shot-ctrl) + 序号指示 (.shot-pager) + 版权行 (.shot-credit)
@@ -93,16 +92,16 @@
 .shot-group .sc-shot[hidden]{display:none;}
 
 /* 序号指示 (右上, absolute 不占流) */
-.shot-pager{position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:8px;
-  padding:4px 10px;border-radius:var(--radius-pill);
-  background:rgba(255,255,255,.82);
+.shot-pager{position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:var(--space-2);
+  padding:var(--space-1) var(--space-2);border-radius:var(--radius-sm);
+  background:var(--overlay-pager-bg);
+  border:1px solid var(--border);   /* V13 门18: 实心底 + 描边分层 (替毛玻璃) */
   color:var(--text-secondary);font-size:12px;line-height:1;
   font-variant-numeric:tabular-nums;font-family:var(--font-mono);
-  pointer-events:none;backdrop-filter:saturate(140%) blur(6px);
-  transition:opacity .18s ease;}
-:root[data-theme="dark"] .shot-pager{background:rgba(20,22,28,.72);}
+  pointer-events:none;
+  transition:opacity .18s ease;}   /* V13 门18/门29: backdrop-filter blur 已删, --overlay-pager-bg 改不透明 (亮 #ffffff / 暗 #14161c), 明度+描边与图底可分离; F7: 容器 pill→radius-sm */
 .shot-pager-text{display:inline-flex;gap:1px;}
-.shot-pager-dots{display:inline-flex;gap:4px;}
+.shot-pager-dots{display:inline-flex;gap:var(--space-1);}
 .shot-pager-dots .dot{width:5px;height:5px;border-radius:50%;
   background:var(--border-strong);transition:background .18s ease;}
 .shot-pager-dots .dot.is-active{background:var(--accent);}
@@ -112,14 +111,13 @@
 .shot-ctrl{position:absolute;bottom:8px;left:10px;
   width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
   border-radius:var(--radius-pill);border:1px solid var(--text-secondary);
-  background:rgba(255,255,255,.86);color:var(--text-secondary);
-  cursor:pointer;padding:0;transition:color .18s ease,border-color .18s ease,transform .18s ease;}
-:root[data-theme="dark"] .shot-ctrl{background:rgba(20,22,28,.76);}
+  background:var(--overlay-ctrl-bg);color:var(--text-secondary);
+  cursor:pointer;padding:0;transition:color .18s ease,border-color .18s ease;}
 .shot-ctrl svg{width:14px;height:14px;}
-@media (hover:hover){.shot-ctrl:hover{color:var(--text-primary);border-color:var(--accent);transform:scale(1.06);}}
+@media (hover:hover){.shot-ctrl:hover{color:var(--text-primary);border-color:var(--accent);}}   /* V13 门11 (issue #18 / R-V13-19): 撤 scale(1.06) —— 与 .card-ctrl button:hover 同值双处叠加, 一元素一信号, 本钮保留 color+border 单信号 (卡堆钮的 scale 保留) */
 .shot-ctrl:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .shot-ctrl[disabled]{opacity:.42;cursor:not-allowed;}
-@media (hover:hover){.shot-ctrl[disabled]:hover{transform:none;color:var(--text-secondary);border-color:var(--text-secondary);}}
+@media (hover:hover){.shot-ctrl[disabled]:hover{color:var(--text-secondary);border-color:var(--text-secondary);}}
 .shot-ctrl-next{left:50px;}                              /* 双钮并排 (375 档 64px 位, 见下方媒体查询) */
 /* 残影卡全局 pointer-events:none 继承 V8 R3.4 (screen.css 已兜底, 此处显式声明图组钮) */
 .sc-card[aria-hidden="true"] .shot-ctrl{pointer-events:none;}
@@ -132,12 +130,12 @@
   .shot-ctrl{width:44px;height:44px;bottom:6px;left:6px;}
   .shot-ctrl svg{width:16px;height:16px;}
   .shot-ctrl-next{left:56px;}
-  .shot-pager{top:6px;right:6px;padding:5px 10px;font-size:12px;}
+  .shot-pager{top:6px;right:6px;padding:var(--space-1) var(--space-2);font-size:12px;}
 }
 
 /* 版权行 (.shot-credit) — 仅 S4 渲染; 图说下方独立语义行 (UX-V10 D9) */
-.shot-credit{margin:6px 12px 0;padding-bottom:8px;font-size:12px;line-height:1.4;
-  color:var(--text-secondary);font-family:var(--font-mono);
+.shot-credit{margin:var(--space-1) var(--space-3) 0;padding-bottom:var(--space-2);font-size:11px;line-height:1.4;
+  color:var(--text-secondary);
   display:flex;flex-wrap:wrap;align-items:baseline;gap:0;}
 .shot-credit[hidden]{display:none;}
 .shot-credit-name{color:var(--text-primary);font-weight:600;}
@@ -148,7 +146,7 @@
 .shot-credit a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
 @media (max-width:767px){
   /* UX-V10 §5.3 方案 A: 单行 ellipsis, 预算侵占收在 ~15px 内 */
-  .shot-credit{margin:6px 8px 0;padding-bottom:6px;font-size:11px;line-height:1.35;
+  .shot-credit{margin:var(--space-1) var(--space-2) 0;padding-bottom:var(--space-1);font-size:11px;line-height:1.35;
     flex-wrap:nowrap;overflow:hidden;}
   .shot-credit a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
 }
@@ -163,8 +161,8 @@ html:not(.js) .shot-credit{display:none;}                /* 版权行依赖 JS �
 .sc-rail .rail-no{min-width:2ch;font-variant-numeric:tabular-nums;letter-spacing:0;}
 .sc-rail button{flex:1 1 0;min-width:0;}                 /* 4 等分兜底: 防 04 挤窄 (仅 375 flex 行生效) */
 @media (max-width:767px){
-  .sc-rail{gap:4px;padding:2px;}                         /* RK3 挤压兜底: 不缩数字, 收 gap 与内衬 */
-  .sc-rail button{padding:0 6px;font-size:12px;}
+  .sc-rail{gap:var(--space-1);padding:2px;}                         /* RK3 挤压兜底: 不缩数字, 收 gap 与内衬 */
+  .sc-rail button{padding:0 var(--space-1);font-size:12px;}
   .sc-rail .rail-no{min-width:1.5ch;font-size:10px;}
 }
 
@@ -186,8 +184,8 @@ html:not(.js) .shot-credit{display:none;}                /* 版权行依赖 JS �
 .shot-zoom[hidden]{display:none;}
 .shot-zoom .sc-shot{pointer-events:none;}             /* 命中一律落在 <a>, 无 img/a 双 hit-test 竞态 */
 .shot-zoom-hint{position:absolute;right:8px;bottom:8px;width:22px;height:22px;
-  display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-pill);
-  background:rgba(20,22,28,.55);color:#f5f1ea;opacity:.7;pointer-events:none;
+  display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);   /* V13 F7: 22px 图标 chip 非控件, pill→小圆角 */
+  background:var(--overlay-hint-bg);color:var(--overlay-hint-fg);opacity:.7;pointer-events:none;
   transition:opacity .18s ease;}
 .shot-zoom-hint svg{width:12px;height:12px;}
 @media (hover:hover){.shot-zoom:hover .shot-zoom-hint{opacity:1;}}
@@ -198,48 +196,69 @@ html:not(.js) .shot-credit{display:none;}                /* 版权行依赖 JS �
 
 /* ===== V11 灯箱 (固定深色面, 两主题恒同 = F8 同族手法) ===== */
 .lb{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;
-  background:rgba(12,10,8,.86);}                      /* #f5f1ea 文本 ≈12:1, 控件描边 ≈8:1, 双档同值 */
+  background:var(--lb-bg);}                         /* 固定深色遮罩 (值见 tokens --lb-bg; 文本 ≈12:1, 控件描边 ≈8:1, 双档同值) */
 .lb[hidden]{display:none;}
 @keyframes lb-fade{from{opacity:0}to{opacity:1}}
 .lb:not([hidden]){animation:lb-fade 120ms ease-out;}  /* ≤150ms (REQ §5.2) */
 .lb-backdrop{position:absolute;inset:0;}              /* 点遮罩关闭承接层 */
 .lb-panel{position:relative;display:flex;flex-direction:column;align-items:center;
-  gap:8px;padding:8px;max-width:100vw;}
+  gap:var(--space-2);padding:var(--space-2);max-width:100vw;}
 .lb-close{position:absolute;top:8px;right:8px;width:44px;height:44px;             /* 两档同 44 (AC-C06) */
   display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-pill);
-  border:1px solid var(--border-strong);background:rgba(20,22,28,.6);color:#f5f1ea;
+  border:1px solid var(--border-strong);background:var(--lb-ctrl-bg);color:var(--lb-fg);
   cursor:pointer;padding:0;transition:border-color .18s ease;}
 .lb-close svg{width:16px;height:16px;}
-@media (hover:hover){.lb-close:hover{border-color:#f5f1ea;}}
+@media (hover:hover){.lb-close:hover{border-color:var(--lb-fg);}}
 .lb-close:focus-visible,.lb-opennew:focus-visible{outline:2px solid var(--accent-on-dark);outline-offset:2px;}
+/* 门76 驳回留痕 (R-V13-3): index.html 灯箱 <img class="lb-img"> 空 src 是 V11 CR-3 有意设计,
+   运行时由 JS open() 注入真实图; 空 src 非缺陷, lint 命中按驳回口径处理。 */
 .lb-img{max-width:min(1400px, calc(100vw - 32px));max-height:calc(100vh - 136px);
-  object-fit:contain;display:block;border-radius:var(--radius-sm);background:#14161c;}
-.lb-caption{margin:0;font-size:13px;line-height:1.45;color:#f5f1ea;
-  font-family:var(--font-mono);text-align:center;}
-.lb-opennew{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;
+  object-fit:contain;display:block;border-radius:var(--radius-sm);background:var(--lb-img-bg);}
+.lb-caption{margin:0;font-size:12px;line-height:1.45;color:var(--lb-fg);
+  text-align:center;}
+.lb-opennew{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--space-4);
   border-radius:var(--radius-pill);border:1px solid var(--border-strong);
-  color:#f5f1ea;font-size:12px;font-family:var(--font-mono);text-decoration:underline;
+  color:var(--lb-fg);font-size:12px;font-family:var(--font-mono);text-decoration:underline;
   text-underline-offset:2px;}
 @media (max-width:767px){
   .lb-img{max-width:calc(100vw - 16px);max-height:calc(100vh - 120px);}
-  .lb-caption{font-size:12px;padding:0 8px;}
+  .lb-caption{font-size:12px;padding:0 var(--space-2);}
 }
 
 /* ===== V11 降级 ===== */
 html:not(.js) .lb, html:not(.js) .shot-zoom-hint{display:none;}
 html:not(.js) .shot-zoom[hidden]{display:none;}       /* 无 JS 只显首图锚点 (V10 同效, 锚点级口径) */
-html[data-lb-open]{overflow:hidden;}                  /* 移动端 rubber-band 锁 */
+html[data-lb-open]{overflow:clip;}                    /* 移动端 rubber-band 锁; V13 门34 (R-V13-7): hidden → clip, 锁滚动语义不变 */
 @media (prefers-reduced-motion: reduce){.lb:not([hidden]){animation:none;}}
 
 /* ===== V11 B2 回收杠杆 (375; UX-V11 §6.2 按序施加; 实测登记见 IMPL-V11 / FIX-V11B) ===== */
 @media (max-width:767px){
-  .shot-credit{margin:4px 8px 0;padding-bottom:0;}                    /* 杠杆2: −10px (S4) */
-  .shot-frame figcaption{line-height:1.3;padding:5px 10px;}           /* 杠杆3: −4px */
+  .shot-credit{margin:var(--space-1) var(--space-2) 0;padding-bottom:0;}                    /* 杠杆2: −10px (S4) */
+  .shot-frame figcaption{line-height:1.3;padding:var(--space-1) var(--space-2);}           /* 杠杆3: −4px */
   /* 杠杆4 (fix-v11b D-V11-2): 顶卡图框 82→64。V11 首轮以 flow 坐标 (offsetTop 系) 误判达标;
      TEST-V11 以渲染 getBoundingClientRect 口径复测 375 EN S4 卡底 692.9 > 667 (tilt 旋转分量
      不在 flow 坐标内), 施加本杠杆。几何边界: ctrl 44 + bottom 6 = 50 ≤ 64 不越框 (B1 口径)。 */
   .sc-card.slot-a .shot-body{height:64px;}
   /* §6.2 余项条款: 杠杆 2+3+4 后渲染 rect 复测 EN S4 卡底 674.9 仍差 7.9px (≤9px 窗口内),
      按 V7 纪律仅收 S4 卡衬上下 padding (10→6, −8px, 不动字号/文本); 实测登记 FIX-V11B。 */
-  #sub-scenarios-3.sc-card{padding:6px 16px;}
+  #sub-scenarios-3.sc-card{padding:var(--space-1) var(--space-4);}
+}
+
+/* ===== V12 issue#12 · 屏2 修复 (UX-V12 §6.2, 全部锁 ≤767px; 桌面 ≥768 零触碰 AC-D06) =====
+   P0-M2 (D12): 顶卡 .shot-body 恢复 16/10 图框 + 隐藏 story/tags 腾竖向空间 ——
+   预演实测 375 顶卡截图 260×51 → 263×161 (AC-D02 阈 h≥150 且 w≥220), card bottom ≤509, innerScroll=0;
+   零删图零裁图, 灯箱入口 (.shot-zoom + hint) 保留 (REQ: 灯箱是兜底非唯一可读途径)。
+   ★ V11 B2 杠杆共存声明 (doc-audit 关注点): 本块以「同媒体查询 + 后片覆盖序 + ID 特异性」
+   确定性取代两条旧杠杆 —— screen.css L260 `.shot-body{height:100px}` 与本文件 V11 杠杆4
+   `.sc-card.slot-a .shot-body{height:64px}`; 覆盖关系由下方显式规则声明, 无互相打架的双写。
+   竖版图专项 (03 卡 sc-traceable 1000×1040): 16/10 框 contain 可见宽不足 → 本卡 aspect-ratio:1。 */
+@media (max-width:767px){
+  #screen-scenarios .sc-card .sc-story{display:none;}   /* 腾竖向空间; 文案在 rail 选中语义仍在 */
+  #screen-scenarios .sc-card .shot-body{height:auto;aspect-ratio:16/10;padding:var(--space-2);}
+  #screen-scenarios .sc-card.slot-a .shot-body{height:auto;}   /* 显式撤 V11 杠杆4 的 64px */
+  #screen-scenarios #sub-scenarios-2 .shot-body{aspect-ratio:1;}  /* 竖版截图卡: 正方形框 */
+  #screen-scenarios .shot-frame figcaption{line-height:1.4;}   /* V11 杠杆3 值维持 (显式声明) */
+  /* E3/D13 tab 脆弱态 (360 档 03 内容 scrollWidth 77>72): nowrap + 收 padding 最小杠杆 */
+  #screen-scenarios .sc-rail button{white-space:nowrap;padding-inline:var(--space-1);}
+  #screen-scenarios .sc-rail .rail-no{font-size:10px;}
 }

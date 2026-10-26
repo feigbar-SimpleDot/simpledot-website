@@ -2,64 +2,67 @@
    退场: 单项 260ms / 进场: 340ms / 级差 40ms (--stagger) / 进场滞后 100ms 交叠
    delay 由 JS 按子序写 --i; 曲线: 退 cubic-bezier(.4,0,1,1) 加速离开, 进 cubic-bezier(.2,0,0,1) 减速落位 */
 .screen > .screen-inner > *{transition:none;}
-.screen.exiting > .screen-inner > *{
+/* V13 门62 (R-V13-8): 依赖脚本点亮的隐藏态收进 html.js (boot 内联脚本挂类, 三页皆有) ——
+   无 JS 时正文完整可见; html.js 下动效行为与 V12 一致 */
+html.js .screen.exiting > .screen-inner > *{
   transition:opacity 260ms cubic-bezier(.4,0,1,1),transform 260ms cubic-bezier(.4,0,1,1);
   transition-delay:calc(var(--i,0) * var(--stagger,40ms));
   opacity:0;transform:translateY(-16px);}
 .screen.entering > .screen-inner > *{
   transition:opacity 340ms cubic-bezier(.2,0,0,1),transform 340ms cubic-bezier(.2,0,0,1);
   transition-delay:calc(var(--i,0) * var(--stagger,40ms));}
-/* entering 起始态由 JS 先挂 .pre (opacity:0/translateY(20px)) 再同帧移除触发进场 */
-.screen.pre > .screen-inner > *{opacity:0;transform:translateY(20px);transition:none;}
+/* entering 起始态由 JS 先挂 .pre (opacity:0/translateY(20px)) 再同帧移除触发进场; V13 门62: 收进 html.js */
+html.js .screen.pre > .screen-inner > *{opacity:0;transform:translateY(20px);transition:none;}
 
 /* ===== 屏 1 · 平台能力: 左文右卡堆 双栏 (UX-V5 §1.2, 冻结) ===== */
-.p-grid{display:grid;grid-template-columns:46% 54%;gap:32px;align-items:center;min-height:calc(100dvh - var(--shell-h) - 64px);}
-.p-title{font-size:clamp(30px,4.6vw,52px);line-height:1.12;letter-spacing:-.015em;font-weight:800;margin:6px 0 12px;}
-.p-title .hl{background-image:linear-gradient(90deg,var(--accent-warm) 0%,var(--accent) 50%,var(--accent-warm) 100%);
+.p-grid{display:grid;grid-template-columns:46% 54%;gap:var(--space-8);align-items:center;min-height:calc(100dvh - var(--shell-h) - 64px);}
+.p-title{font-size:clamp(30px,4.6vw,52px);line-height:1.12;letter-spacing:-.015em;font-weight:800;margin:var(--space-1) 0 var(--space-3);}
+.p-title .hl{background-image:linear-gradient(90deg,var(--accent-hover) 0%,var(--accent) 50%,var(--accent-hover) 100%); /* R-V13-17 guard: 改色后 warm↔accent 色相坡道 213°>40°, 流光两端换新 accent 同族两档 (坡道 0°); 本行为实现③ 白名单偏差 D1, 见 implementation-notes-v13-c */
   background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
   animation:shimmer 12s linear infinite;}                         /* M7 流光 12s 缓流 (V5.4), 全站恰 1 处 */
-.p-sub{color:var(--text-secondary);font-size:17px;margin-bottom:20px;}
-.p-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px;}
+.p-sub{color:var(--text-secondary);font-size:17px;margin-bottom:var(--space-5);}
+.p-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3);margin-bottom:var(--space-4);}
 .p-value{background:var(--surface-card);border:1px solid var(--card-edge);border-radius:var(--radius-md);
-  padding:12px 14px;box-shadow:var(--shadow-soft);}
+  padding:var(--space-3) var(--space-3);box-shadow:var(--shadow-soft);}
 .p-value b{display:block;font-size:14px;margin-bottom:2px;}
 .p-value span{font-size:12.5px;color:var(--text-secondary);line-height:1.5;}
-.p-aud{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
-.p-aud span{font-size:12px;padding:5px 12px;border-radius:var(--radius-pill);
+.p-aud{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-5);}
+.p-aud span{font-size:12px;padding:var(--space-1) var(--space-3);border-radius:var(--radius-sm);   /* V13 F7 (issue #18): 受众标签非控件, pill→小圆角 */
   background:var(--badge-neutral-bg);color:var(--text-secondary);}
-.p-cta{display:flex;gap:12px;flex-wrap:wrap;}
-.btn-ghost{display:inline-flex;align-items:center;min-height:44px;padding-inline:18px;border-radius:var(--radius-pill);
+.p-cta{display:flex;gap:var(--space-3);flex-wrap:wrap;}
+.btn-ghost{display:inline-flex;align-items:center;min-height:44px;padding-inline:var(--space-4);border-radius:var(--radius-pill);
   border:1px solid var(--border-strong);color:var(--text-primary);font-size:14px;font-weight:500;
   background:transparent;cursor:pointer;transition:border-color .18s ease,transform .18s ease;}
 .btn-ghost:hover{border-color:var(--accent);transform:translateY(-1px);}
 
 /* ===== V6 屏级 chrome (眉标+h2+子tab条, 跨态常驻不闪, UX-V6 §5.1: 116/124px) ===== */
 .sc-chrome{padding-top:0;}
-.sc-chrome h2{margin-bottom:6px;}                    /* V6 屏3 仍用 chrome, 保留 h2 间距定义 */
+.sc-chrome h2{margin-bottom:var(--space-1);}                    /* V6 屏3 仍用 chrome, 保留 h2 间距定义 */
 
 /* ===== V7 屏2 两栏布局 (UX-V7 §2~§3 / REQ-V7 §3.3): 左 sc-stack 牌堆 + 右 sc-rail 编号列表 =====
    桌面 ≥1024 grid 63/34 (左 63% + 右 34%, 间隙 24px = 共享 gutter 公式 100-63-34-2.6 ≈ 0); align-items:start 防右栏拉高行 */
-.sc-stage{display:grid;grid-template-columns:63fr 24px 34fr;align-items:start;gap:0;
+.sc-stage{display:grid;grid-template-columns:minmax(0,63fr) 24px minmax(0,34fr);align-items:start;gap:0;  /* V13 门50 (R-V13-10): 裸 63fr/34fr 轨承载图片 → minmax(0,…) */
   /* grid-column 锁定避免 div 跨列时变列错位 */
 }
 .sc-stack{grid-column:1;}
 .sc-rail{grid-column:3;align-self:start;}           /* 右栏跨 grid-col 3 锁宽度 */
 @media (max-width:1023px){
-  .sc-stage{grid-template-columns:minmax(0,1fr);gap:14px;}
+  .sc-stage{grid-template-columns:minmax(0,1fr);gap:var(--space-3);}
   .sc-stack, .sc-rail{grid-column:auto;}
   .sc-rail{grid-auto-rows:48px;}
 }
 /* 子 tab 条: 胶囊视觉复用 (token 原样), 条高44/钮高36; 桌面滑动指示, 375 静态高亮 (D2, V6 屏3 沿用) */
-.subnav{background:var(--pill-track);border-radius:var(--radius-pill);padding:4px;
-  display:inline-flex;gap:2px;height:44px;margin:2px 0 10px;max-width:100%;}
+.subnav{background:var(--pill-track);border-radius:var(--radius-lg);padding:var(--space-1);   /* V13 F7 (issue #18): 轨道容器 = 卡片圆角 (胶囊只留给控件本体: 内部 button/pill-ind 保留 pill) */
+  display:inline-flex;gap:2px;height:44px;margin:2px 0 var(--space-2);max-width:100%;}
 .subnav .pill-track{position:relative;display:flex;gap:2px;}
 .subnav .pill-ind{position:absolute;top:0;left:0;height:100%;border-radius:var(--radius-pill);
   background:var(--pill-active-bg);z-index:0;
   transform:translateX(var(--pill-x,0px));width:var(--pill-w,0px);
-  transition:transform 440ms cubic-bezier(.2,0,0,1),width 440ms cubic-bezier(.2,0,0,1);}
+  /* V13 门10a (R-V13-9): width 退出过渡表 —— --pill-w 由 JS 直写即时落位, 滑动只走 transform (合成器层) */
+  transition:transform 440ms cubic-bezier(.2,0,0,1);}
 .subnav.no-anim .pill-ind{transition:none;}       /* 首帧定位无过渡 */
 .subnav button{position:relative;z-index:1;border:0;background:transparent;cursor:pointer;
-  height:36px;padding-inline:14px;border-radius:var(--radius-pill);
+  height:36px;padding-inline:var(--space-3);border-radius:var(--radius-pill);
   font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--pill-idle-fg);
   white-space:nowrap;transition:color .18s ease;}
 .subnav button:hover{color:var(--pill-idle-fg-hover);}
@@ -71,7 +74,7 @@
   border:2px solid transparent;border-radius:var(--radius-lg);
   background:linear-gradient(var(--surface-card),var(--surface-card)) padding-box,
              var(--sc-border-grad) border-box;       /* 渐变只活在 2px 边框; padding-box 纯色保内底零污染 */
-  box-shadow:var(--card-shadow-3);padding:20px;
+  box-shadow:var(--card-shadow-3);padding:var(--space-5);
   transition:transform 480ms cubic-bezier(0.8,0,1,1),opacity 0s;  /* 默认退场曲线 + 时长 (UX-V7 §5.1) */
 }
 /* slot 几何值: token --sc-tilt (媒体查询覆盖 375 = -1.5deg);
@@ -84,10 +87,10 @@
 .sc-card.slot-a{z-index:3;height:auto;transform:rotate(var(--sc-tilt)) translate(0,0) scale(1);}
 .sc-card.slot-b{z-index:2;height:200px;overflow:hidden;transform:rotate(-7deg) translate(-28px,10px) scale(.955);
   background:var(--badge-neutral-bg);border:2px solid var(--card-ghost-edge);
-  box-shadow:none;}
+  box-shadow:none;color:var(--text-primary);}   /* V13 门41 (R-V13-19): 深底显式文字色 token (残影卡内容 aria-hidden 不可见, 零视觉变化) */
 .sc-card.slot-c{z-index:1;height:200px;overflow:hidden;transform:rotate(-11.5deg) translate(-52px,20px) scale(.91);
   background:var(--badge-neutral-bg);border:2px solid var(--card-ghost-edge);
-  box-shadow:none;}
+  box-shadow:none;color:var(--text-primary);}   /* V13 门41 同上 */
 /* 换牌期间内容 visibility 卡背化 (V7 fix-up D-V7-P0-1): 顶卡可见, 残影卡**全部子内容**
    (含 sc-name)隐藏 — 旧规则 :not(.sc-name) 漏了 sc-name 导致残影卡名漏出;
    卡元素自身不隐藏 (visibility 只作用子代), 卡背背景/边框照常呈现「被抽出的牌」 */
@@ -105,26 +108,23 @@
   transition:transform 600ms cubic-bezier(0,0,0.2,1) 60ms;}   /* 与顶卡入场同曲线同延迟 (UX-V7 §5.1) */
 .sc-rail.no-anim .rail-ind{transition:none;}                    /* 首帧定位无过渡 (no-anim 继承 V6 口径) */
 .sc-rail button{position:relative;z-index:1;border:0;background:transparent;cursor:pointer;
-  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;
-  padding-inline:12px;border-radius:var(--radius-lg);
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--space-2);
+  padding-inline:var(--space-3);border-radius:var(--radius-lg);
   font-family:var(--font-sans);font-size:16px;font-weight:600;line-height:1;
   color:var(--pill-idle-fg);text-align:left;
   transition:color .18s ease;}
 .sc-rail button:hover{color:var(--pill-idle-fg-hover);}
 .sc-rail button[aria-current="true"]{color:var(--pill-active-fg);font-weight:700;}
 /* 编号: 等宽小灰, 暗/亮档 tertiary (实算 6.14/4.91 PASS), 激活行换 --text-secondary (6.41/9.66 PASS) */
-.sc-rail .rail-no{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;color:var(--text-tertiary);}
+.sc-rail .rail-no{font-size:11px;letter-spacing:0;color:var(--text-tertiary);}
 .sc-rail button[aria-current="true"] .rail-no{color:var(--text-secondary);}
 /* 四角星: 内联 SVG 渲染在 .rail-star span; 仅激活行显示, 暗档深字亮条 / 亮档白字深条 = 字对比 ≥16:1 */
 /* 残影 / 装饰只对 ring/rail-no 等; 屏级 sc-stage 已 top-align */
 
 /* ===== V7 屏2 内容组样式 (与 V6 §3.4 同名类同名 key, 样式重写与原 56+8+24+12+96 等预算对齐) ===== */
-.sc-name{font-size:34px;font-weight:800;letter-spacing:-.01em;margin-bottom:8px;}
-.sc-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-.sc-tags span{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  padding:4px 10px;border:1px solid var(--card-edge);border-radius:var(--radius-pill);color:var(--text-tertiary);}
-.sc-story{font-size:16px;line-height:1.7;margin-bottom:10px;max-width:56ch;}   /* max-width:64ch→56 (UX-V7 §8 预算收紧) */
-.sc-shot{margin:14px 0 4px;}
+.sc-name{font-size:34px;font-weight:800;letter-spacing:-.01em;margin-bottom:var(--space-2);}
+.sc-story{font-size:16px;line-height:1.7;margin-bottom:var(--space-2);max-width:56ch;}   /* max-width:64ch→56 (UX-V7 §8 预算收紧) */
+.sc-shot{margin:var(--space-3) 0 var(--space-1);}
 /* V7: 屏2 域内覆盖旧 560; V7 fix-up D-V7-P0-2: 480→440 — 1280×800 屏容器 736 =
    padding 64 + chrome 62 + 顶卡高; 顶卡 616 时 deal 同步流高 748 恒 +12,
    收 shot 宽 40 (16/10 省高 25px) 使顶卡 ≤591, 双视口 k0/k1/k2 零溢出;
@@ -132,10 +132,10 @@
 .shot-frame.sc-shot{max-width:440px;}
 
 /* ===== 屏 3 通用件 ===== */
-.st-h3{font-size:18px;margin-bottom:12px;}
-.st-step h3{font-size:18px;margin-bottom:6px;margin-top:12px;}
-.code-block{position:relative;background:var(--bg-code);border-radius:var(--radius-md);margin:4px 0;overflow:hidden;}
-.code-block pre{margin:0;padding:10px 14px;overflow-x:auto;overscroll-behavior-x:contain;}  /* 横滚豁免 (REQ §3.2-3) */
+.st-h3{font-size:18px;margin-bottom:var(--space-3);}
+.st-step h3{font-size:18px;margin-bottom:var(--space-1);margin-top:var(--space-3);}
+.code-block{position:relative;background:var(--bg-code);color:var(--code-text);border-radius:var(--radius-md);margin:var(--space-1) 0;overflow:hidden;}   /* V13 门41 (R-V13-19): 恒深码块显式文字色 token = 子代 code 同值继承, 零视觉变化 */
+.code-block pre{margin:0;padding:var(--space-2) var(--space-3);overflow-x:auto;overscroll-behavior-x:contain;}  /* 横滚豁免 (REQ §3.2-3) */
 .code-block code{color:var(--code-text);font-size:13px;line-height:1.5;white-space:pre;}
 .copy-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
   border:1px solid var(--copy-btn-border);border-radius:8px;background:var(--copy-btn-bg);cursor:pointer;
@@ -149,46 +149,47 @@
 .copy-btn.copied{color:var(--ok-icon);}
 .copy-btn.copied .ic-copy{display:none;}
 .copy-btn.copied .ic-check{display:block;}
-.warn{font-family:var(--font-mono);font-size:12px;color:var(--callout-fg);margin-top:6px;}
-.callout{font-size:13px;line-height:1.6;color:var(--text-secondary);border-left:3px solid var(--accent);
-  padding:8px 12px;margin-top:10px;background:var(--accent-soft);border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+.warn{font-family:var(--font-mono);font-size:12px;color:var(--callout-fg);margin-top:var(--space-1);}
+.callout{font-size:13px;line-height:1.6;color:var(--text-secondary);border:1px solid var(--border-strong);
+  padding:var(--space-2) var(--space-3);margin-top:var(--space-2);background:var(--accent-soft);border-radius:var(--radius-sm);}
+  /* V13 门3 (issue #18 / R-V13-19): 左 3px accent 色条 → 整圈 hairline (模板腔清零), 底色 accent-soft 保留识别度 */
 table.matrix{width:100%;border-collapse:collapse;font-size:13px;}
-table.matrix th,table.matrix td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
-table.matrix th{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);}
+table.matrix th,table.matrix td{text-align:left;padding:var(--space-2) var(--space-2);border-bottom:1px solid var(--border);}
+table.matrix th{font-size:10px;letter-spacing:0;color:var(--text-tertiary);}
 /* 折叠件 (V6 态C FAQ×2 互斥展开, UX-V6 §5.3/D8): body 钳制 min(40vh,240px) 桌面 / 84px <768;
    body 内滚 = 唯一豁免滚动, overscroll-behavior:contain 不带动外层 (REQ §3.2-4) */
-.accordion{border:1px solid var(--border);border-radius:var(--radius-md);margin:8px 0;overflow:hidden;}
+.accordion{border:1px solid var(--border);border-radius:var(--radius-md);margin:var(--space-2) 0;overflow:hidden;}
 .acc-btn{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;
-  padding:10px 14px;border:0;background:transparent;cursor:pointer;color:var(--text-primary);
+  padding:var(--space-2) var(--space-3);border:0;background:transparent;cursor:pointer;color:var(--text-primary);
   font-family:var(--font-sans);font-size:14px;text-align:left;}
 .acc-btn .chev{transition:transform .25s ease;flex:none;}
 .accordion.open .acc-btn .chev{transform:rotate(180deg);}
 .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
 .accordion.open .acc-body{max-height:min(40vh,240px);overflow:auto;overscroll-behavior:contain;}
-.acc-inner{padding:4px 14px 14px;font-size:13.5px;line-height:1.7;color:var(--text-secondary);}
+.acc-inner{padding:var(--space-1) var(--space-3) var(--space-3);font-size:13.5px;line-height:1.7;color:var(--text-secondary);}
 /* 一行极简 footer 带 (REQ-V6 §7, AC-V6-10): 高 ≤48px 桌面单行; 375 两行 ≤64px */
 .ft-strip{margin-top:auto;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
-  gap:6px 14px;min-height:48px;padding:10px 0 6px;font-size:12px;color:var(--text-tertiary);
+  gap:var(--space-1) var(--space-3);min-height:48px;padding:var(--space-2) 0 var(--space-1);font-size:12px;color:var(--text-tertiary);
   border-top:1px solid var(--border);}
 .ft-strip a{font-size:13px;color:var(--accent);}
 .ft-strip a:hover{color:var(--accent-hover);}
 /* 截图框 .shot-frame (V8 引入的图框纪律组件; V11 起屏2 全为真实截图) */
 .shot-frame{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;background:var(--shot-grad);box-shadow:var(--shadow-soft);max-width:100%;}
-.shot-body{aspect-ratio:16/10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;}
+.shot-body{aspect-ratio:16/10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);padding:var(--space-6);}
 .shot-icon{width:64px;height:64px;color:var(--shot-icon);flex-shrink:0;}
 .shot-label{font-size:14px;line-height:1.5;color:var(--shot-label);text-align:center;}
-.shot-tag{position:absolute;top:10px;left:12px;background:var(--warning-tint);color:var(--warning);font-size:12px;font-weight:600;padding:2px 10px;border-radius:var(--radius-pill);}
-.shot-frame figcaption{padding:10px 14px;font-size:14px;line-height:1.65;color:var(--text-secondary);border-top:1px solid var(--border);background:var(--shot-caption-bg);}
+.shot-tag{position:absolute;top:10px;left:12px;background:var(--warning-tint);color:var(--warning);font-size:12px;font-weight:600;padding:2px var(--space-2);border-radius:var(--radius-pill);}
+.shot-frame figcaption{padding:var(--space-2) var(--space-3);font-size:14px;line-height:1.65;color:var(--text-secondary);border-top:1px solid var(--border);background:var(--shot-caption-bg);}
 /* 屏3 通用小件 */
 .scroll-x{overflow-x:auto;}
-.qs-ol{color:var(--text-secondary);padding-left:20px;font-size:14px;}
-.bd-quote{font-size:20px;font-weight:700;margin-top:12px;}
-.mt6{margin-top:6px;}.mb6{margin-bottom:6px;}.mt10{margin-top:10px;}.mt12{margin-top:12px;}
+.qs-ol{color:var(--text-secondary);padding-left:var(--space-5);font-size:14px;}
+.bd-quote{font-size:20px;font-weight:700;margin-top:var(--space-3);}
+.mt6{margin-top:var(--space-1);}.mb6{margin-bottom:var(--space-1);}.mt10{margin-top:var(--space-2);}.mt12{margin-top:var(--space-3);}
 .txt-sm{font-size:13px;}.muted{color:var(--text-secondary);}
 .btn-sm{min-height:44px;font-size:13px;}
 /* 态A 375 前置芯片行 (D10: 桌面表格 / 移动降级芯片, 信息不缩字号) */
-.pre-chips{display:none;flex-wrap:wrap;gap:6px;}
-.chip{font-size:12px;padding:4px 10px;border-radius:var(--radius-pill);white-space:nowrap;
+.pre-chips{display:none;flex-wrap:wrap;gap:var(--space-1);}
+.chip{font-size:12px;padding:var(--space-1) var(--space-2);border-radius:var(--radius-pill);white-space:nowrap;
   border:1px solid var(--border-strong);color:var(--text-secondary);}
 
 /* ===== 态容器: flex column 使 footer 带 margin-top:auto 贴底 (UX-V6 §8)
@@ -198,7 +199,7 @@ table.matrix th{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em
 
 /* ===== 屏布局响应式 ===== */
 @media (max-width:1023px){
-  .p-grid{grid-template-columns:minmax(0,1fr);gap:24px;min-height:0;padding-block:8px;}
+  .p-grid{grid-template-columns:minmax(0,1fr);gap:var(--space-6);min-height:0;padding-block:var(--space-2);}
   .sc-name{font-size:28px;}
   /* V7 屏2 中档规则已在 04-style-screen.css 顶部 1023 media 内合写 (sc-stage/sc-stack/sc-rail) */
 }
@@ -209,25 +210,24 @@ table.matrix th{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em
   /* V7 屏2 375 上下结构回退 (UX-V7 §4, 详见 04b-style-screen-v7.css 避免 04 越 15KB) */
   /* 375 截图框定高 108 (D10: 16/10 原比例 254px 破 180 预算 → 钳制定高);
      图注/故事/命令/callout 行高收紧对齐 UX-V6 §5.1 预算 (字号 ≥12px 微标签下限, 正文不缩) */
-  .shot-body{aspect-ratio:auto;height:108px;gap:8px;padding:12px;}
+  .shot-body{aspect-ratio:auto;height:108px;gap:var(--space-2);padding:var(--space-3);}
   .shot-icon{width:44px;height:44px;}
   .shot-label{font-size:12px;}
-  .shot-frame figcaption{padding:8px 12px;font-size:14px;line-height:1.5;}
-  .sc-story{font-size:15px;line-height:1.6;margin-bottom:10px;}
-  .sc-name{margin-bottom:6px;}
-  .sc-tags span{padding:3px 8px;}
-  .code-block pre{padding:10px 12px;}
+  .shot-frame figcaption{padding:var(--space-2) var(--space-3);font-size:14px;line-height:1.5;}
+  .sc-story{font-size:15px;line-height:1.6;margin-bottom:var(--space-2);}
+  .sc-name{margin-bottom:var(--space-1);}
+  .code-block pre{padding:var(--space-2) var(--space-3);}
   .code-block code{font-size:12.5px;line-height:1.55;}
-  .callout{padding:6px 10px;line-height:1.55;}
+  .callout{padding:var(--space-1) var(--space-2);line-height:1.55;}
   .qs-ol{line-height:1.6;}
   .qs-ol li{margin-bottom:2px;}
   /* footer 一行带 375 (AC-V6-10 ≤64px 两行, RV6-P1-1 修复; main 二选项 = 隐藏隐私行 + ©与GitHub同行,
      几何上需并用: 隐私长文案 ~490px 在 317px 行宽内必折第3行, 隐藏之; 剩余 4 元素 = 行1 ©+GitHub、
      行2 README+design.md (链接合计 ~202px ≤ 行宽, 行数 ≤2 几何保证)。
      封闭集 5 元素 DOM 不动 (display:none 纯视觉), 桌面单行规则不动 */
-  .ft-strip{gap:2px 10px;padding:6px 0 2px;min-height:0;}
+  .ft-strip{gap:2px var(--space-2);padding:var(--space-1) 0 2px;min-height:0;}
   .ft-priv{display:none;}
-  .ft-strip a{padding-block:3px;line-height:1.4;}
+  .ft-strip a{padding-block:var(--space-1);line-height:1.4;}
   .ft-strip a:nth-of-type(1),.ft-strip a:nth-of-type(2){order:2;}   /* README/design.md 排行为末 */
   /* 前置表 → 芯片行 */
   .pre-table{display:none;}
@@ -242,48 +242,45 @@ table.matrix th{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em
   /* V7 屏2 375 媒体查询已迁入 04b-style-screen-v7.css (按片大小纪律拆分) */
   
   /* ===== 375 高度预算二次收紧 (实测对齐 UX-V6 §5.1 预算; 字号全部达下限, 不用缩字号换空间) ===== */
-  .eyebrow{margin-bottom:4px;}
-  .sc-chrome h2{margin-bottom:4px;}
+  .sc-chrome h2{margin-bottom:var(--space-1);}
   .subnav{margin:0;}
-  .p-sub{margin-bottom:12px;}
-  .p-title{margin:4px 0 8px;}
-  .p-values{gap:8px;margin-bottom:12px;}
-  .p-value{padding:8px 10px;}
-  .p-aud{margin-bottom:12px;}
-  .p-grid{gap:16px;}
-  .sc-tags{gap:4px;margin-bottom:8px;}
-  .sc-tags span{padding:2px 6px;}
-  .sc-shot{margin:8px 0 2px;}
+  .p-sub{margin-bottom:var(--space-3);}
+  .p-title{margin:var(--space-1) 0 var(--space-2);}
+  .p-values{gap:var(--space-2);margin-bottom:var(--space-3);}
+  .p-value{padding:var(--space-2) var(--space-2);}
+  .p-aud{margin-bottom:var(--space-3);}
+  .p-grid{gap:var(--space-4);}
+  .sc-shot{margin:var(--space-2) 0 2px;}
   /* V7 fix-up D-V7-P0-2 连带 (375 EN 档): UX-V7 §4 预算按 EN 保守行高定, 实测 k=0
      卡超可用 15px — shot-body 108→100 + 图注 line-height 1.5→1.4 (14px 字号不动,
      仍在可读线), 回收 ~15px; zh 档本有富余不受观感影响 */
   .shot-body{height:100px;}
   .shot-frame figcaption{line-height:1.4;}
-  .st-step h3{margin:8px 0 4px;}
-  .st-h3{margin-bottom:8px;}
+  .st-step h3{margin:var(--space-2) 0 var(--space-1);}
+  .st-h3{margin-bottom:var(--space-2);}
   .qs-ol{line-height:1.55;}
-  .warn{margin-top:4px;}
-  .callout{margin-top:6px;}
-  .bd-quote{font-size:18px;margin-top:8px;}
-  .accordion{margin:4px 0;}
+  .warn{margin-top:var(--space-1);}
+  .callout{margin-top:var(--space-1);}
+  .bd-quote{font-size:18px;margin-top:var(--space-2);}
+  .accordion{margin:var(--space-1) 0;}
   /* ===== 屏3 375 档三段式再收 (实测 668>611, 收 ~60px; 全为间距行高, 非缩字号) ===== */
-  #screen-start .screen-inner{padding:10px 14px;}
-  #screen-scenarios .screen-inner{padding:10px 14px;}
-  .st-step h3{font-size:16px;margin:6px 0 3px;}
-  .st-h3{font-size:17px;margin-bottom:6px;}
-  .code-block pre{padding:8px 12px;}
-  .code-block{margin:3px 0;}
+  #screen-start .screen-inner{padding:var(--space-2) var(--space-3);}
+  #screen-scenarios .screen-inner{padding:var(--space-2) var(--space-3);}
+  .st-step h3{font-size:16px;margin:var(--space-1) 0 var(--space-1);}
+  .st-h3{font-size:17px;margin-bottom:var(--space-1);}
+  .code-block pre{padding:var(--space-2) var(--space-3);}
+  .code-block{margin:var(--space-1) 0;}
   .code-block code{font-size:12.5px;line-height:1.45;}
-  .warn{margin-top:3px;font-size:11px;}
-  .pre-chips{gap:5px;}
-  .chip{padding:3px 8px;}
-  .qs-ol{padding-left:18px;line-height:1.5;font-size:13.5px;}
+  .warn{margin-top:var(--space-1);font-size:11px;}
+  .pre-chips{gap:var(--space-1);}
+  .chip{padding:var(--space-1) var(--space-2);}
+  .qs-ol{padding-left:var(--space-4);line-height:1.5;font-size:13.5px;}
   .qs-ol li{margin-bottom:1px;}
-  .callout{padding:5px 9px;line-height:1.45;font-size:12.5px;margin-top:5px;}
-  .mt10{margin-top:6px;}
+  .callout{padding:var(--space-1) var(--space-2);line-height:1.45;font-size:12.5px;margin-top:var(--space-1);}
+  .mt10{margin-top:var(--space-1);}
   .bd-quote{font-size:17px;}
   .txt-sm{font-size:12.5px;}
-  .ft-strip{min-height:0;padding:6px 0 2px;max-width:100%;}   /* RV6-P2-6: 态C 底带收敛, 不越 92vw 圆角内容盒 */
+  .ft-strip{min-height:0;padding:var(--space-1) 0 2px;max-width:100%;}   /* RV6-P2-6: 态C 底带收敛, 不越 92vw 圆角内容盒 */
 }
 
 /* ===== contact 屏 (ARCH-V8 §4.5 / UX-V8 §7): 新增 token = 0, 全复用既有变量 ===== */
@@ -297,18 +294,16 @@ html[data-lang="zh"] .ct-block--mail { display: none; }
   border: 2px solid transparent;
   border-radius: var(--radius-lg);
   box-shadow: var(--card-shadow-1);   /* 屏 2 主角卡 shadow-3, 屏 4 副卡用 shadow-1 层级 */
-  padding: 20px;
+  padding: var(--space-5);
   max-width: min(560px, 100%);
   margin: 0 auto;
 }
 .ct-label{
   display: block;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0;
   color: var(--text-tertiary);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 .ct-mail{
   display: inline-block;
@@ -317,9 +312,9 @@ html[data-lang="zh"] .ct-block--mail { display: none; }
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
-  padding: 12px 8px;
+  padding: var(--space-3) var(--space-2);
   min-height: 44px;     /* 触控命中带, AC 无障碍 */
-  margin: 0 -8px;       /* 抵消 padding 保视觉位置 */
+  margin: 0 calc(var(--space-2) * -1);       /* 抵消 padding 保视觉位置 */
 }
 .ct-mail:hover{ color: var(--accent-hover); }
 .ct-mail:focus-visible{ outline: 2px solid var(--accent); outline-offset: 4px; }
@@ -327,19 +322,19 @@ html[data-lang="zh"] .ct-block--mail { display: none; }
   display: block;
   width: 208px;
   height: 208px;
-  background: #fbf9f6;       /* 占位资产自带底, 此处为退化保护 */
+  background: var(--qr-bg);       /* 占位资产自带底, 此处为退化保护 (V13 门48 提 token) */
   border: 1.5px solid var(--brand-ring);
   border-radius: var(--radius-md);
   margin: 0 auto;
 }
 .ct-caption{
-  margin-top: 8px;
+  margin-top: var(--space-2);
   text-align: center;
   font-size: 13px;
   color: var(--text-tertiary);
 }
 .ct-micro{
-  margin-top: 12px;
+  margin-top: var(--space-3);
   font-size: 13px;
   color: var(--text-tertiary);
   max-width: 42ch;
@@ -356,3 +351,40 @@ html[data-lang="zh"] .ct-block--mail { display: none; }
 /* ===== V9 ICP 备案号控制 ===== */
 html[data-lang="en"] .ft-icp { display: none; }
 html[data-lang="zh"] .ft-icp { display: inline; color: var(--text-tertiary); }
+
+/* ===== V12 N3 · START 屏态C 卡片级双入口 (UX-V12 §5.3, issue#10/#11) =====
+   p-value 卡同族视觉, 全取既有 token; ≤767 纵排规则见下方 V12 移动块 (AC-A04) */
+.qs-entries{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin:var(--space-3) 0 var(--space-1);}
+.qs-entry{display:flex;flex-direction:column;gap:var(--space-1);min-height:64px;padding:var(--space-3) var(--space-3);
+  background:var(--surface-card);border:1px solid var(--card-edge);border-radius:var(--radius-md);
+  box-shadow:var(--shadow-soft);color:var(--text-primary);text-decoration:none;
+  transition:border-color .18s ease,transform .18s ease;}
+.qs-entry:hover{border-color:var(--accent);transform:translateY(-1px);}
+.qs-entry:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.qs-entry-t{font-size:16px;font-weight:700;}
+.qs-entry-d{font-size:12.5px;color:var(--text-secondary);line-height:1.5;}
+
+/* ===== V12 issue#12 · 手机屏重排 (UX-V12 §6.1, 全部锁 ≤767px; 桌面 ≥768 零规则零回归 AC-D06) =====
+   P0-M1 屏1 (D10/D11): 卡堆前置为第一行 + 文案瘦身 —— 预演实测卡堆顶 739→82 (AC-D01 阈 ≤487),
+   .card-ctrl 底 362 屏内可见; 被隐藏的 .p-sub/.p-aud 与屏3 互补不构成信息灭失, .p-values 留 <b> 标题行。
+   不给 .screen 开 overflow-y (F9/V6 屏内滚动=缺陷纪律), 修复只用重排。 */
+@media (max-width:767px){
+  #screen-platform .p-grid{grid-template-rows:auto minmax(0,1fr);row-gap:var(--space-2);}
+  #screen-platform .cardstack-wrap{order:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  #screen-platform .p-copy{order:2;min-height:0;}
+  #screen-platform .cardstack{height:200px;}          /* D11 残差收口杠杆 220→200 */
+  #screen-platform .p-sub{display:none;}
+  #screen-platform .p-aud{display:none;}
+  #screen-platform .p-values{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2);}
+  #screen-platform .p-value{padding:var(--space-1) var(--space-2);}
+  #screen-platform .p-value span{display:none;}       /* 保留 <b> 三点标题行 */
+  #screen-platform .card-ctrl{justify-content:center;}
+  #screen-platform .p-title{overflow-wrap:break-word;}  /* E4 断词孤字观感项 */
+  /* D11 残差收口 (实测补充): 卡堆前置后装饰辉光层 ::before (1200px 径向) 在收矮的
+     .screen-inner 内产生 ink-overflow 104~128px (屏内滚动残差)。实测该层隐藏后残差 = 0,
+     而卡堆后 accent 辉光仍由 .cardstack 本体 + 卡影提供 → 手机档关掉外圈辉光, 观感无损。
+     桌面 ≥768 零触碰 (V5.4 辉光不变)。 */
+  #screen-platform .cardstack-wrap::before{display:none;}
+  /* N3 移动档: 双卡纵排 (UX-V12 §5.3) */
+  .qs-entries{grid-template-columns:1fr;gap:var(--space-2);}
+}

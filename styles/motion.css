@@ -25,24 +25,26 @@ html.theme-anim *::after{
   transition:background-color 200ms ease,
              color 200ms ease,
              border-color 200ms ease,
-             outline-color 200ms ease,
              fill 200ms ease,
              stroke 200ms ease;
+  /* V13 门15 (R-V13-10): outline-color 已移出过渡表 —— 主题切换窗口内焦点环即时出现 (WCAG 2.4.7) */
 }
 
 /* ===== reduced-motion 降级矩阵 (UX-V5 §8, 全动效无豁免, 11 项) =====
    铁律: 入场类显式可见兜底 (opacity:1 + 终值 transform), 禁依赖全局规则兜 opacity:0 */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{transition-duration:0s !important;animation-duration:0s !important;animation-iteration-count:1 !important;}
-  /* 1. M1 屏切换: 瞬时 (无位移无交错) */
-  .screen.exiting > .screen-inner > *{opacity:0;transform:none;}
-  .screen.pre > .screen-inner > *{opacity:1;transform:none;}
+  /* 1. M1 屏切换: 瞬时 (无位移无交错)
+     V13 门62 同步 (R-V13-8): 基础隐藏态已收进 html.js, 此处兜底选择器同步加域,
+     保持与 screen.css 同特异性 + 源序在后 → reduce 档兜底不回退 */
+  html.js .screen.exiting > .screen-inner > *{opacity:0;transform:none;}
+  html.js .screen.pre > .screen-inner > *{opacity:1;transform:none;}
   /* 2. M1 胶囊滑动: 瞬时跳位 */
   .pill-ind{transition:none !important;}
   /* 3. M2 发牌入场: 直接扇形终位 (显式兜底, 不靠全局规则) */
   .cardstack.dealing .tcard{animation:none;opacity:1;}
-  /* 4. M2 翻牌: 直切 (JS 走 reduce 分支, 此处兜住让位态) */
-  .tcard.flip-out{transition:none;opacity:0;}
+  /* 4. M2 翻牌: 直切 (JS 走 reduce 分支, 此处兜住让位态; V13 门62: 同步 html.js 作用域) */
+  html.js .tcard.flip-out{transition:none;opacity:0;}
   /* 5. M3 星空: 单帧定格 (JS boot 判 matchMedia, 不启动 rAF) */
   /* 6. M4 辉光: 静态中档 opacity .5 (V4.1 特异性教训: 双选择器压暗档覆盖) */
   .btn-start::after{animation:none;opacity:.5;}

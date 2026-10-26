@@ -1,0 +1,131 @@
+/* ===== V12 独立静态页共用片 (faq.html / manual.html; UX-V12 D1) =====
+   仅两新页引用, index.html 不加载 = 首页 CSS 零增长 (AC-G03 体积 + AC-D06 零回归)。
+   纪律: 零新增 token、零裸色 (全部 var() 取自 tokens.css 既有值); 无星空/vignette 氛围层 (D16, 文档页纯色底)。 */
+
+/* ---- 文档原生滚动解锁 (D2/F9): shell.css 的 html/body overflow:hidden 是轮播语境专属,
+       两新页是长文档语义 = 主文档滚动条; 首页不加载本片, 锁死机制不受影响 ---- */
+html{height:auto;overflow:auto;}
+body{height:auto;min-height:100dvh;overflow:visible;background:var(--bg-page);}
+
+/* ---- 页体骨架: 固定 header 下让位 + 单栏 ≤72ch (3.1) ---- */
+.page{width:min(720px,92vw);margin-inline:auto;
+  padding:calc(var(--shell-h) + var(--space-7)) 0 0;}
+main:focus{outline:none;}
+.page-head{margin-bottom:var(--space-2);}
+.page-head h1{font-size:30px;letter-spacing:-.01em;}
+.page-sub{color:var(--text-secondary);font-size:15px;margin-top:var(--space-1);}
+
+/* ---- FAQ 手风琴 (3.1/3.2): 多条同开 (D4), body 不钳高 (D3), 文档滚法语境 ---- */
+.faq-list{margin-top:var(--space-4);}
+.faq-item{border:1px solid var(--border);border-radius:var(--radius-md);margin:var(--space-2) 0;
+  background:var(--surface-card);overflow:hidden;transition:border-color .18s ease;}
+.faq-item:hover{border-color:var(--border-strong);}
+.faq-item h2{font-size:inherit;font-family:inherit;font-weight:inherit;}
+.faq-btn{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);width:100%;
+  min-height:44px;padding:var(--space-2) var(--space-3);border:0;background:transparent;cursor:pointer;
+  color:var(--text-primary);font-family:var(--font-sans);font-size:14px;font-weight:600;text-align:left;}
+.faq-btn:hover{color:var(--accent-hover);}
+.faq-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
+.faq-btn .chev{transition:transform .25s ease;flex:none;color:var(--text-tertiary);}
+.faq-item.open .faq-btn .chev{transform:rotate(180deg);}
+.faq-body{max-height:0;overflow:hidden;transition:max-height .24s ease;}
+.faq-inner{padding:var(--space-1) var(--space-3) var(--space-3);font-size:14px;line-height:1.7;color:var(--text-secondary);}
+.faq-foot{margin-top:var(--space-4);font-size:14px;color:var(--text-secondary);}
+.faq-foot a{white-space:nowrap;}
+/* 无 JS 降级 (D5): 全量直出展开, 钮降级为标题行, chev 隐藏 (镜像 .card-ctrl 范式) */
+html:not(.js) .faq-body{max-height:none;}
+html:not(.js) .faq-btn{cursor:default;}
+html:not(.js) .faq-btn:hover{color:var(--text-primary);}
+html:not(.js) .faq-btn .chev{display:none;}
+@media (prefers-reduced-motion: reduce){
+  .faq-body{transition:none;}
+  .faq-item{transition:none;}
+}
+
+/* ---- 手册双栏 (4.1): ≥1024 左 sticky TOC 232 + gutter 32 + 右正文 ---- */
+@media (min-width:1024px){
+  .page--two-col{width:min(1044px,94vw);
+    display:grid;grid-template-columns:232px minmax(0,1fr);column-gap:var(--space-8);align-items:start;}
+  .man-toc{position:sticky;top:calc(var(--shell-h) + 16px);
+    max-height:calc(100dvh - var(--shell-h) - 32px);overflow:auto;overscroll-behavior:contain;}
+  .man-toc summary{display:none;}                    /* 桌面目录常驻 (D6), summary 行隐 */
+  .man-toc details{display:block;}
+}
+.man-toc{scroll-margin-top:calc(var(--shell-h) + 12px);}
+.man-toc summary{display:flex;align-items:center;gap:var(--space-2);min-height:44px;cursor:pointer;
+  font-size:14px;font-weight:600;color:var(--text-primary);padding:0 var(--space-3);
+  background:var(--surface-card);border:1px solid var(--border);border-radius:var(--radius-md);}
+/* R-1: 桌面隐藏重申于基础规则之后 (同特异性靠源序胜出, 修 :51 被 :55 覆盖) */
+@media (min-width:1024px){.man-toc summary{display:none;}}
+.man-toc summary::-webkit-details-marker{display:none;}
+.man-toc summary::after{content:"";width:8px;height:8px;flex:none;margin-left:auto;
+  border-right:2px solid var(--text-tertiary);border-bottom:2px solid var(--text-tertiary);
+  transform:rotate(45deg);transition:transform .2s ease;}
+.man-toc details[open] summary::after{transform:rotate(-135deg);}
+.man-toc ul{list-style:none;margin:0;padding:0;}
+.man-toc .man-toc-cat{font-size:11px;
+  color:var(--text-tertiary);padding:var(--space-2) var(--space-3) 2px;}
+.man-toc li a{display:flex;align-items:center;min-height:44px;padding-block:var(--space-2);padding-inline:var(--space-3);
+  font-size:13.5px;line-height:1.5;color:var(--text-secondary);border-radius:var(--radius-sm);}
+.man-toc li a:hover{color:var(--text-primary);}
+.man-toc li a[aria-current="true"]{color:var(--text-primary);font-weight:600;}
+@media (max-width:1023px){
+  .man-toc details{margin-top:var(--space-1);background:var(--surface-card);
+    border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+  .man-toc summary{border:0;border-radius:0;}
+  .man-toc ul{padding:var(--space-1) 0 var(--space-2);border-top:1px solid var(--border);}
+}
+
+.man-body{min-width:0;}
+.man-body .page-head{margin-bottom:var(--space-1);}
+.man-cat{scroll-margin-top:calc(var(--shell-h) + 12px);}
+.man-cat > h2{font-size:20px;margin:var(--space-6) 0 var(--space-1);}
+.man-entry{scroll-margin-top:calc(var(--shell-h) + 12px);margin-top:var(--space-3);}
+.man-entry h3{font-size:16px;margin-bottom:var(--space-1);}
+.man-entry > p{font-size:14.5px;color:var(--text-secondary);}
+.man-quote{border-left:2px solid var(--border-strong);background:var(--bg-warm);
+  padding:var(--space-2) var(--space-3);margin-top:var(--space-2);border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  font-size:14px;line-height:1.7;color:var(--text-primary);}
+.man-foot{margin-top:var(--space-5);font-size:14px;color:var(--text-secondary);}
+/* ---- V14 手册表格 (issue #11 entry3): table.matrix 同值复刻 + 375 横滚包层; 零新 token/零裸色 ---- */
+.man-entry h4{font-size:15px;margin:var(--space-3) 0 var(--space-1);}
+.man-tablewrap{overflow-x:auto;margin:var(--space-2) 0;}
+.man-table{border-collapse:collapse;width:100%;font-size:13px;}
+.man-table th,.man-table td{text-align:left;padding:var(--space-1) var(--space-2);border-bottom:1px solid var(--border);color:var(--text-secondary);}
+.man-table th{color:var(--text-tertiary);font-weight:600;}
+.man-list{margin:var(--space-2) 0;padding-left:var(--space-5);}
+.man-entry li{font-size:14px;line-height:1.7;color:var(--text-secondary);}
+.man-entry li p{margin:var(--space-1) 0;}
+.man-foot a{white-space:nowrap;}
+
+/* ---- 代码块 + 复制钮 (4.3): 与主站 screen.css 同值复刻 (两新页不加载 screen.css) ---- */
+.code-block{position:relative;background:var(--bg-code);color:var(--code-text);border-radius:var(--radius-md);margin:var(--space-2) 0;overflow:hidden;}   /* V13 门41 (R-V13-19): 恒深码块显式文字色 token = 子代 code 同值继承, 零视觉变化 */
+.code-block pre{margin:0;padding:var(--space-2) var(--space-3);overflow-x:auto;overscroll-behavior-x:contain;}
+.code-block code{color:var(--code-text);font-size:13px;line-height:1.5;white-space:pre;}
+.copy-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;display:inline-flex;
+  align-items:center;justify-content:center;border:1px solid var(--copy-btn-border);border-radius:8px;
+  background:var(--copy-btn-bg);cursor:pointer;color:var(--code-comment);
+  transition:color .15s ease,border-color .15s ease;}
+.copy-btn:hover{color:var(--code-text);border-color:var(--copy-btn-border-hover);}
+.copy-btn::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:44px;height:44px;}                                    /* 视觉 32 / 触控 44 (AC-D05) */
+.copy-btn svg{width:15px;height:15px;}
+.copy-btn .ic-check{display:none;}
+.copy-btn.copied{color:var(--ok-icon);}
+.copy-btn.copied .ic-copy{display:none;}
+.copy-btn.copied .ic-check{display:block;}
+html:not(.js) .copy-btn{display:none;}                        /* AC-C04: 隐藏而非报错 */
+
+/* ---- 页脚一行带 (D14): 复用 .ft-strip 视觉, 极简三元素; 主站完整带属首页法务语境 ---- */
+.ft-strip{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:var(--space-1) var(--space-3);
+  min-height:48px;padding:var(--space-3) 0 var(--space-5);margin-top:var(--space-8);font-size:12px;color:var(--text-tertiary);
+  border-top:1px solid var(--border);}
+.ft-strip a{font-size:13px;color:var(--accent);}
+.ft-strip a:hover{color:var(--accent-hover);}
+
+/* ---- 移动档 (3.3, 移动优先兜底微调) ---- */
+@media (max-width:767px){
+  .page{padding-top:calc(var(--shell-h) + var(--space-4));}
+  .page-head h1{font-size:26px;}                             /* .screen h2 375 档同值 */
+  .man-cat > h2{margin:var(--space-5) 0 var(--space-1);}
+}

@@ -2,22 +2,24 @@
    桌面 ≥1024: 单行 ≤64 (品牌 + 3屏文字链 + README/GitHub + 主题 + 语言)
    <1024: 单行 ≤56 (品牌 ellipsis + 汉堡 44×44, 焦点圈闭在 12c) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{height:100%;overflow:hidden;}                 /* 主文档物理锁死 (AC-V6-01) */
-body{height:100vh;height:100dvh;overflow:hidden;  /* dvh 处理移动端地址栏, vh 兜底 */
+/* V13 门34 (R-V13-7): 横向 overflow:clip (clip 不创建滚动容器, 不破坏后代 sticky);
+   纵向保持 hidden 锁死 —— AC-V6-01 主文档物理锁死口径不变 (index 轮播纵向本就不滚) */
+html{height:100%;overflow-x:clip;overflow-y:hidden;}   /* 主文档物理锁死 (AC-V6-01) */
+body{height:100vh;height:100dvh;overflow-x:clip;overflow-y:hidden;  /* dvh 处理移动端地址栏, vh 兜底 */
   font-family:var(--font-sans);font-size:15px;line-height:1.7;color:var(--text-primary);
   background:var(--bg-page);-webkit-font-smoothing:antialiased;}
-h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;line-height:1.25;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;line-height:1.25;text-wrap:balance;}   /* V13 F3 (issue #18 / R-V13-19): 标题换行体面, text-wrap 继承覆盖三页全部标题规则 */
 a{color:var(--accent);text-decoration:none;}
 a:hover{color:var(--accent-hover);}
 code,.mono{font-family:var(--font-mono);}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
 .skip-link{position:absolute;left:-9999px;top:0;display:inline-flex;align-items:center;min-height:44px;
-  background:var(--accent);color:var(--on-accent);padding:8px 16px;z-index:100;border-radius:0 0 var(--radius-sm) 0;}
+  background:var(--accent);color:var(--on-accent);padding:var(--space-2) var(--space-4);z-index:100;border-radius:0 0 var(--radius-sm) 0;}
 .skip-link:focus{left:0;color:var(--on-accent);}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
-/* 微标签: 等宽 10px/0.12em 大写 (UX-V5 §10 字阶) */
-.mtag{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);}
-.mtag--powered{font-size:9px;letter-spacing:.18em;}
+/* 微标签 (V13 门67/64 R-V13-5: 回正文字体+降一档, 原 等宽 10px/0.12em 大写; UX-V5 §10 字阶) */
+.mtag{font-size:9px;letter-spacing:0;color:var(--text-tertiary);}
+.mtag--powered{font-size:8px;letter-spacing:0;}
 
 /* ===== 星空层 (z0, 单实例, 装饰) ===== */
 #starfield{position:fixed;inset:0;z-index:0;pointer-events:none;display:block;}
@@ -31,19 +33,19 @@ html:not(.js) #starfield{display:none;}
   background:var(--shell-glass);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:16px;padding-inline:24px;}
+  display:flex;align-items:center;gap:var(--space-4);padding-inline:var(--space-6);}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .site-header{background:var(--bg-page);}          /* 毛玻璃不支持 → 不透明兜底 */
 }
-.shell-brand{display:flex;align-items:center;gap:10px;color:var(--text-primary);flex:none;}
+.shell-brand{display:flex;align-items:center;gap:var(--space-2);color:var(--text-primary);flex:none;}
 .shell-brand .logo-word{font-size:15px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;}
 .shell-spacer{flex:1;}
-.shell-actions{display:flex;align-items:center;gap:8px;flex:none;}
+.shell-actions{display:flex;align-items:center;gap:var(--space-2);flex:none;}
 /* 屏导航文字链 + 外链 (UX-V6 §7.1): idle 次级色; active = 加重 + accent 2px 下划线 (D1) */
-.nav-links{display:flex;align-items:center;gap:22px;}
-.nav-ext{display:flex;align-items:center;gap:18px;}
+.nav-links{display:flex;align-items:center;gap:var(--space-5);}
+.nav-ext{display:flex;align-items:center;gap:var(--space-4);}
 .nav-links a,.nav-ext a{font-size:14px;font-weight:500;color:var(--text-secondary);white-space:nowrap;
-  padding-block:4px;transition:color .18s ease;}
+  padding-block:var(--space-1);transition:color .18s ease;}
 .nav-links a:hover,.nav-ext a:hover{color:var(--text-primary);}
 .nav-links a.is-active{color:var(--text-primary);font-weight:600;
   text-decoration:underline;text-decoration-color:var(--accent);
@@ -51,7 +53,7 @@ html:not(.js) #starfield{display:none;}
 
 /* START 主按钮样式保留仅供屏1 hero CTA (08 冻结片依赖); 壳层 START 钮已删 (C1) */
 .btn-start{position:relative;z-index:0;display:inline-flex;align-items:center;justify-content:center;
-  height:40px;min-width:44px;padding-inline:20px;border:0;border-radius:var(--radius-pill);cursor:pointer;
+  height:40px;min-width:44px;padding-inline:var(--space-5);border:0;border-radius:var(--radius-pill);cursor:pointer;
   background:var(--accent);color:var(--on-accent);font-family:var(--font-sans);font-size:14px;font-weight:600;
   transition:background-color .18s ease,transform .18s ease;}
 .btn-start:hover{background:var(--accent-hover);transform:translateY(-1px);}
@@ -75,8 +77,8 @@ html:not(.js) #starfield{display:none;}
 :root[data-theme="dark"] .ic-sun{display:none;}
 :root:not([data-theme="dark"]) .ic-moon{display:none;}
 .lang-switch{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius-pill);overflow:hidden;height:44px;}
-.lang-switch button{border:0;background:transparent;cursor:pointer;padding-inline:12px;height:100%;
-  font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;color:var(--text-secondary);}
+.lang-switch button{border:0;background:transparent;cursor:pointer;padding-inline:var(--space-3);height:100%;
+  font-size:11px;letter-spacing:0;color:var(--text-secondary);}
 .lang-switch button[aria-checked="true"]{background:var(--pill-active-bg);color:var(--pill-active-fg);}
 
 /* ===== 汉堡 + 移动菜单 + 遮罩 (UX-V6 §7.2, V4 F8 焦点圈闭机制回收) ===== */
@@ -89,11 +91,12 @@ html:not(.js) #starfield{display:none;}
   background:var(--menu-veil);opacity:0;visibility:hidden;transition:opacity .2s ease;}
 .menu-overlay.open{opacity:1;visibility:visible;}
 .mobile-menu{position:fixed;top:var(--shell-h);right:0;z-index:41;
-  width:min(320px,100vw);max-width:100vw;max-height:calc(100dvh - var(--shell-h));
+  width:min(320px,100%);max-width:100%;  /* V13 门34 (R-V13-7): 100vw 含滚动条宽会溢出 → 100% (fixed 定位含块=视口) */
+  max-height:calc(100dvh - var(--shell-h));
   overflow-y:auto;overscroll-behavior:contain;   /* chrome 滚动豁免 (UX-V6 §7.2), 屏零溢出口径不含菜单 */
-  background:var(--shell-glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
-  border-left:1px solid var(--border);border-bottom:1px solid var(--border);
-  border-radius:0 0 0 var(--radius-lg);padding:8px 16px 16px;display:none;flex-direction:column;}
+  background:var(--surface-card);   /* V13 门18 (R-V13-19): 毛玻璃→实心面 (门29 glass 清零) —— 亮档白卡 vs 暖米纸 page, 暗档 #221d18 vs #0f0e10; F24 纪律: 边缘感与投影二选一, 本面选投影 elevation (shadow-lift), 描边删除 */
+  box-shadow:var(--shadow-lift);
+  border-radius:0 0 0 var(--radius-lg);padding:var(--space-2) var(--space-4) var(--space-4);display:none;flex-direction:column;}
 .mobile-menu.open{display:flex;}
 .mobile-menu a{display:flex;align-items:center;min-height:44px;font-size:16px;color:var(--text-secondary);}
 .mobile-menu a.is-active{color:var(--text-primary);font-weight:600;text-decoration:underline;
@@ -118,26 +121,35 @@ html:not(.js) #starfield{display:none;}
    .cardstack 本体 transform (rock/tilt/Z) 零触碰 */
 .cardstack-parallax{transform:translate3d(0, calc(var(--shift,0) * -0.45 * var(--slide-h, 100vh)), 0);}
 .screen.sliding.snap .cardstack-parallax{transition:transform var(--snap-dur, 520ms) cubic-bezier(.2,0,0,1);}
-.screen-inner{max-width:1200px;margin:0 auto;padding:32px;}
+.screen-inner{max-width:1200px;margin:0 auto;padding:var(--space-8);}
 /* V6 ST2-a/b 星空全覆盖根因修复 (D9): 屏2/3 满屏阅读底 --screen-bg-translucent 已删,
    改局部底带 --scrim-band 只垫内容列; 左右 gutter ≥4vw + 上下 padding 星空直出。
    屏 section / .screen--platform 无任何背景铺底 (computed = rgba(0,0,0,0)) */
 .screen--scenarios .screen-inner,.screen--start .screen-inner{
   background:var(--scrim-band);border-radius:var(--radius-lg);width:min(960px,92vw);}
 /* 屏内通用排版 */
-.screen h2{font-size:28px;margin-bottom:8px;}
-.screen .lead{color:var(--text-secondary);font-size:16px;margin-bottom:24px;}
-.eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.screen h2{font-size:28px;margin-bottom:var(--space-2);}
+.screen .lead{color:var(--text-secondary);font-size:16px;margin-bottom:var(--space-6);}
 
 /* ===== 响应式: header 两档 (UX-V6 §1.3: 汉堡断点 <1024, D5) ===== */
 @media (max-width:1023px){
   :root{--shell-h:56px;}
-  .site-header{padding-inline:16px;gap:10px;}
+  .site-header{padding-inline:var(--space-4);gap:var(--space-2);}
   .shell-brand .logo-word{font-size:13px;overflow:hidden;text-overflow:ellipsis;max-width:38vw;}
   /* 仅品牌 + 汉堡可见 (AC-V6-04); 主题/语言收进菜单, 一次点击可达 */
   .nav-links,.nav-ext,.shell-actions{display:none;}
   .hamburger{display:inline-flex;}
 }
 @media (max-width:767px){
-  .screen-inner{padding:20px 16px;}
+  .screen-inner{padding:var(--space-5) var(--space-4);}
+}
+
+/* ===== V12 N1 溢出杠杆 (UX-V12 §5.1/D9, F7 预演实测过档): 1024~1099 档 header 加两链
+   (FAQ/使用手册) 后 actions 右界越界 +22px → nav gap 22→14 / logo 词截断 / nav-ext gap 18→12;
+   ≥1100 自然宽不受影响, <1024 走汉堡本无此问题; 新页同规则命中但仅两链无溢出风险 (值仍安全)
+   ---- */
+@media (min-width:1024px) and (max-width:1099px){
+  .nav-links{gap:var(--space-3);}
+  .nav-ext{gap:var(--space-3);}
+  .shell-brand .logo-word{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 }

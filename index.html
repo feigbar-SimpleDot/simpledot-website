@@ -74,11 +74,14 @@
     <a href="#scenarios" data-target="scenarios" data-i18n="nav.screen.scenarios">场景案例</a>
     <a href="#start" data-target="start" data-i18n="nav.screen.start">快速开始</a>
     <a href="#contact" data-target="contact" data-i18n="nav.screen.contact">联系我们</a>
+    <!-- V12 N1 (issue#10/#11): 独立静态页外链, 追加在屏链后 (内→外); 无 data-target = 不参与 SPA active 联动 -->
+    <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+    <a href="manual.html" data-i18n="nav.manual">使用手册</a>
   </nav>
   <span class="mtag" aria-hidden="true">│</span>
   <nav class="nav-ext" aria-label="外链">
-    <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">README</a>
-    <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+    <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank" class="wordmark">README</a>
+    <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
   </nav>
   <div class="shell-actions">
     <button type="button" class="icon-btn theme-toggle" aria-pressed="false" data-i18n-attr="aria-label:theme.toggle" aria-label="切换主题">
@@ -102,8 +105,11 @@
   <a href="#scenarios" data-target="scenarios" data-i18n="nav.screen.scenarios">场景案例</a>
   <a href="#start" data-target="start" data-i18n="nav.screen.start">快速开始</a>
   <a href="#contact" data-target="contact" data-i18n="nav.screen.contact">联系我们</a>
-  <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">README</a>
-  <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+  <!-- V12 N2 (issue#10/#11): 移动抽屉双入口, 既有 4 链后 README 前; .mobile-menu a 既有 min-height:44px (AC-A03) -->
+  <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+  <a href="manual.html" data-i18n="nav.manual">使用手册</a>
+  <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank" class="wordmark">README</a>
+  <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
   <div class="mm-row">
     <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.switch" aria-label="切换语言">
       <button type="button" data-lang-btn="zh" aria-checked="true">中</button>
@@ -123,7 +129,6 @@
   <div class="screen-inner">
     <div class="p-grid">
       <div class="p-copy">
-        <div class="eyebrow" data-i18n="hero.eyebrow">多 Agent 协作平台 · Multi-agent platform</div>
         <h1 class="p-title"><span data-i18n="hero.t1">让多个 AI Agent 像一支</span> <span class="hl" data-i18n="hero.hl">训练有素的团队</span><span data-i18n="hero.t2">，长时间替你干活</span></h1>
         <p class="p-sub" data-i18n="hero.sub">基于 Hermes 原生 Kanban 的多 Agent 长时任务编排与追踪平台。</p>
         <div class="p-values">
@@ -138,7 +143,7 @@
         </div>
         <div class="p-cta">
           <button type="button" class="btn-start" data-goto="start" data-i18n="hero.cta.start">快速开始</button>
-          <a class="btn-ghost" href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank" data-i18n="hero.cta.github">GitHub ↗</a>
+          <a class="btn-ghost" href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank" data-i18n="hero.cta.github">GitHub ↗</a>
         </div>
       </div>
       <!-- 任务卡堆: 需求卡 → Agent 执行卡 → 产物卡 (Simple-Dot 自有隐喻, REQ-V5 §4) -->
@@ -155,7 +160,7 @@
             <div class="tc-head"><span class="mtag" data-i18n="card1.tag">一句话需求</span><span class="mtag tc-seq" data-i18n="card1.seq">01/03</span></div>
             <div class="tc-title" data-i18n="card1.title">你提的活，一句话</div>
             <div class="tc-desc" data-i18n="card1.desc">派活只要一句人话，不用写工单。</div>
-            <div class="tc-powered mtag mtag--powered">POWERED BY SIMPLE-DOT</div>
+            <div class="tc-powered mtag mtag--powered">Powered by Simple-Dot</div>
             </div>
           </article>
           <article class="tcard" data-card="2" data-slot="2">
@@ -163,7 +168,7 @@
             <div class="tc-head"><span class="mtag" data-i18n="card2.tag">并行执行</span><span class="mtag tc-seq" data-i18n="card2.seq">02/03</span></div>
             <div class="tc-title" data-i18n="card2.title">Agent 团队并行干活</div>
             <div class="tc-desc" data-i18n="card2.desc">独立容器同时跑，进度实时回流。</div>
-            <div class="tc-powered mtag mtag--powered">POWERED BY SIMPLE-DOT</div>
+            <div class="tc-powered mtag mtag--powered">Powered by Simple-Dot</div>
             </div>
           </article>
           <article class="tcard" data-card="3" data-slot="3">
@@ -171,15 +176,15 @@
             <div class="tc-head"><span class="mtag" data-i18n="card3.tag">结算回执</span><span class="mtag tc-seq" data-i18n="card3.seq">03/03</span></div>
             <div class="tc-title" data-i18n="card3.title">产物 + 结算回执</div>
             <div class="tc-desc" data-i18n="card3.desc">三重校验只认真凭据，失败不装成功。</div>
-            <div class="tc-powered mtag mtag--powered">POWERED BY SIMPLE-DOT</div>
+            <div class="tc-powered mtag mtag--powered">Powered by Simple-Dot</div>
             </div>
           </article>
           </div></div>
         </div>
         </div><!-- /.cardstack-parallax -->
         <div class="card-ctrl">
-          <button type="button" id="cardPrev" data-i18n-attr="aria-label:card.prev" aria-label="上一张">‹</button>
-          <button type="button" id="cardNext" data-i18n-attr="aria-label:card.next" aria-label="下一张">›</button>
+          <button type="button" id="cardPrev" data-i18n-attr="aria-label:card.prev" aria-label="上一张"><span class="card-arrow" aria-hidden="true"></span></button>
+          <button type="button" id="cardNext" data-i18n-attr="aria-label:card.next" aria-label="下一张"><span class="card-arrow" aria-hidden="true"></span></button>
         </div>
       </div>
     </div>
@@ -191,7 +196,6 @@
 <section class="screen screen--scenarios" id="screen-scenarios" role="region" aria-roledescription="屏幕" aria-label="场景案例" data-i18n-attr="aria-roledescription:screen.roledescription,aria-label:nav.screen.scenarios" hidden>
   <div class="screen-inner">
     <div class="sc-chrome">
-      <div class="eyebrow" data-i18n="sc.kicker">场景案例 / Scenarios</div>
       <h2 data-i18n="sc.title">你会用它做什么</h2>
     </div>
 
@@ -202,8 +206,7 @@
         <!-- 态 A · S1 过夜长任务 (初始顶卡 slot-a; V8 R3.4: 顶卡不写 aria-hidden) -->
         <div class="sc-card slot-a" id="sub-scenarios-0" data-substate="0">
           <div class="sc-name" data-i18n="s1.big">过夜长任务</div>
-          <div class="sc-tags" aria-hidden="true"><span>OVERNIGHT JOBS</span><span>PARALLEL EXECUTION</span><span>AUTO SETTLEMENT</span></div>
-          <p class="sc-story" data-i18n="s1.story">「下班前把整个 issue 列表交给 Agent，它在夜晚自动逐条处理，第二天早上你直接验收结果——跑完的、卡住的、跑挂的，全都摆在那里等你确认。」</p>
+          <p class="sc-story" data-i18n="s1.story">「下班前把整个 issue 列表交给 Agent，它在夜晚自动逐条处理，第二天早上你直接验收结果：跑完的、卡住的、跑挂的，全都摆在那里等你确认。」</p>
           <figure class="shot-frame sc-shot">
             <span class="shot-tag" data-i18n="s1.shot.tag">实图 / Screenshot</span>
             <div class="shot-body">
@@ -221,7 +224,6 @@
         <!-- 态 B · S2 多角色流水线 (残影卡 slot-b/c, 内容组与 slot-a 同构, V7 fix-up D-V7-P0-1) -->
         <div class="sc-card slot-b" id="sub-scenarios-1" data-substate="1" aria-hidden="true">
           <div class="sc-name" data-i18n="s2.big">多角色流水线</div>
-          <div class="sc-tags" aria-hidden="true"><span>MULTI-ROLE</span><span>PIPELINE</span><span>STREAMING</span></div>
           <p class="sc-story" data-i18n="s2.story">「产品经理拆需求、工程师写码、测试验收，一条流水线自动流转，卡住会主动来问我，而不是瞎做。」</p>
           <figure class="shot-frame sc-shot">
             <span class="shot-tag" data-i18n="s2.shot.tag">实图 / Screenshot</span>
@@ -249,7 +251,6 @@
         </div>
         <div class="sc-card slot-c" id="sub-scenarios-2" data-substate="2" aria-hidden="true">
           <div class="sc-name" data-i18n="s3.big">全程可追踪</div>
-          <div class="sc-tags" aria-hidden="true"><span>FULL CHAIN</span><span>TRACEABILITY</span><span>AUDITABLE</span></div>
           <p class="sc-story" data-i18n="s3.story">「谁在干什么、干到哪一步、产物在哪，打开看板一目了然；出问题能回放每一步操作。」</p>
           <figure class="shot-frame sc-shot">
             <span class="shot-tag" data-i18n="s3.shot.tag">实图 / Screenshot</span>
@@ -269,8 +270,7 @@
              双真实截图 + 版权原始 GitHub 链接红线 = REQ-V10 §3.2, 两链接 href+caption 各 ≥2 命中不可删) -->
         <div class="sc-card slot-d" id="sub-scenarios-3" data-substate="3" aria-hidden="true">
           <div class="sc-name" data-i18n="s4.big">完全兼容优秀开源项目</div>
-          <div class="sc-tags" aria-hidden="true"><span>OPEN-SOURCE</span><span>COMPATIBLE</span><span>PROTOCOL LAYER</span></div>
-          <p class="sc-story" data-i18n="s4.story">「直接对接开源生态——任务、产物与执行记录按协议层互通，不用为了接入既有开源工具重新造一遍轮子。」</p>
+          <p class="sc-story" data-i18n="s4.story">「直接对接开源生态：任务、产物与执行记录按协议层互通，不用为了接入既有开源工具重新造一遍轮子。」</p>
           <figure class="shot-frame sc-shot">
             <span class="shot-tag" data-i18n="s4.shot.tag">实图 / Screenshot</span>
             <div class="shot-body">
@@ -286,7 +286,7 @@
               </div>
               <div class="shot-pager" aria-live="polite" aria-atomic="true" data-i18n-attr="aria-label:shot.pager.label" aria-label="图组当前张序 / 总张数">
                 <span class="shot-pager-text"><span class="shot-pager-cur">1</span>/<span class="shot-pager-total">2</span></span>
-                <span class="shot-pager-dots" aria-hidden="true"><span class="dot is-active"></span><span class="dot"></span></span>
+                <!-- V13 门63 (R-V13-10): 装饰性 dot is-active 已删, 全站 pager 活状态仅保留一处 (屏2 首卡); 当前张序由 aria-live 文本播报 -->
               </div>
               <button type="button" class="shot-ctrl shot-ctrl-prev" data-i18n-attr="aria-label:shot.prev" aria-label="上一张" disabled aria-disabled="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L4 8 L10 13"/></svg></button>
               <button type="button" class="shot-ctrl shot-ctrl-next" data-i18n-attr="aria-label:shot.next" aria-label="下一张"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3 L12 8 L6 13"/></svg></button>
@@ -319,7 +319,6 @@
 <section class="screen screen--start" id="screen-start" role="region" aria-roledescription="屏幕" aria-label="快速开始" data-i18n-attr="aria-roledescription:screen.roledescription,aria-label:nav.screen.start" hidden>
   <div class="screen-inner">
     <div class="sc-chrome">
-      <div class="eyebrow" data-i18n="qs.kicker">快速开始 / Quick Start</div>
       <h2 data-i18n="qs.title">快速开始</h2>
       <nav class="subnav no-anim" data-i18n-attr="aria-label:a11y.subnav.st" aria-label="快速开始子导航">
         <div class="pill-track">
@@ -348,7 +347,7 @@
       </div>
       <div class="st-step">
         <h3>① <span data-i18n="qs.step1">拿代码</span></h3>
-        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code>git clone https://github.com/feigbar-beep/simpledot-agent-studio &amp;&amp; cd &lt;repo&gt;</code></pre></div>
+        <div class="code-block"><button class="copy-btn" aria-label="复制" data-i18n-attr="aria-label:a11y.copy"><svg aria-hidden="true" class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg><svg aria-hidden="true" class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button><pre><code>git clone https://github.com/feigbar-SimpleDot/simpledot-agent-studio &amp;&amp; cd &lt;repo&gt;</code></pre></div>
       </div>
       <div class="st-step">
         <h3>② <span data-i18n="qs.step2">填配置（只填带 ★ 的一项即可跑）</span></h3>
@@ -366,7 +365,7 @@ open http://&lt;host&gt;:8700</code></pre></div>
       </div>
     </div>
 
-    <!-- 态 B · 上手: worker 四步 + 2 callout + DEPLOY 一行 (Q-6 压缩Z) -->
+    <!-- 态 B · 上手: worker 四步 + 2 callout + 部署文档链接一行 (Q-6 压缩Z; V13 门19/67: DEPLOY 大写去除, 链体改译文+↗) -->
     <div class="substate" id="sub-start-1" data-substate="1" hidden>
       <h3 class="st-h3" data-i18n="qs.worker.title">加第一个 worker（控制台操作，无需命令行）</h3>
       <ol class="qs-ol">
@@ -376,8 +375,8 @@ open http://&lt;host&gt;:8700</code></pre></div>
         <li data-i18n="qs.worker.s4">保存后 main 即可向该 profile 下发任务</li>
       </ol>
       <div class="callout" data-i18n="qs.callout.root">worker 容器必须设环境变量 HERMES_WRITE_SAFE_ROOT=/share_workspace，否则写不了共享卷。</div>
-      <div class="callout" data-i18n="qs.callout.model">模型 / 端点是 Hermes 自身的配置，本平台不代管——改模型只改 worker 自己，注册表一字不动。</div>
-      <p class="mt10 txt-sm" data-i18n="qs.trouble.link">完整故障排查见部署文档 <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">DEPLOY ↗</a></p>
+      <div class="callout" data-i18n="qs.callout.model">模型 / 端点是 Hermes 自身的配置，本平台不代管，改模型只改 worker 自己，注册表一字不动。</div>
+      <p class="mt10 txt-sm"><a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank"><span data-i18n="qs.trouble.link">完整故障排查见部署文档</span> ↗</a></p>
     </div>
 
     <!-- 态 C · 边界与 FAQ: 金句 → 注 → webui 单链 → FAQ×2 互斥 → 数据安全小字 → footer 一行带 (D3 阅读序) -->
@@ -386,6 +385,17 @@ open http://&lt;host&gt;:8700</code></pre></div>
       <div class="bd-quote">「<span data-i18n="bd.quote">这里管工作流，那里管 Agent。</span>」</div>
       <p class="mt6 txt-sm muted" data-i18n="bd.quote.sub">想让 Agent 本身更强，去配 Hermes；想让它们协同干活可管理，用我们。</p>
       <p class="mt10"><a href="https://github.com/nesquena/hermes-webui" rel="noopener" target="_blank" data-i18n="bd.link.webui">hermes-webui ↗</a></p>
+      <!-- V12 N3 (issue#10/#11, UX-V12 D8): 态C 卡片级双入口, #faq 块之前; 桌面双卡并排 / ≤767 纵排 (screen.css) -->
+      <div class="qs-entries">
+        <a class="qs-entry" href="faq.html">
+          <span class="qs-entry-t" data-i18n="nav.faq">FAQ</span>
+          <span class="qs-entry-d" data-i18n="startp.faq.desc">快问快答：边界、故障与常见问题</span>
+        </a>
+        <a class="qs-entry" href="manual.html">
+          <span class="qs-entry-t" data-i18n="nav.manual">使用手册</span>
+          <span class="qs-entry-d" data-i18n="startp.manual.desc">worker 配置、协作 how-to（wiki 式）</span>
+        </a>
+      </div>
       <div id="faq">
         <div class="accordion" data-exclusive="1"><button class="acc-btn" aria-expanded="false"><span data-i18n="faq.q1">和 hermes-webui 有什么区别？</span><svg aria-hidden="true" class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div class="acc-inner"><div data-i18n="faq.a1">本平台是为「任务编排」服务的轻量界面（看板 + 对话入口 + 执行员注册），不是 Hermes 的通用 Web 前端。需要更完善的 WebUI 请用 hermes-webui。</div></div></div></div>
         <div class="accordion" data-exclusive="1"><button class="acc-btn" aria-expanded="false"><span data-i18n="faq.q3">任务跑挂了怎么办？</span><svg aria-hidden="true" class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div class="acc-inner"><div data-i18n="faq.a3">会话存档独立于进程存活，执行容器崩溃后可凭存档同会话恢复；失败只标记阻塞、绝不误判成功，重派是主控（main）的显式决策。</div></div></div></div>
@@ -403,7 +413,6 @@ open http://&lt;host&gt;:8700</code></pre></div>
          hidden>
   <div class="screen-inner">
     <div class="sc-chrome">
-      <div class="eyebrow" data-i18n="ct.kicker">联系我们</div>
       <h2 data-i18n="ct.title">跟我们聊聊</h2>
       <p class="lead" data-i18n="ct.lead">产品、部署或合作相关问题，直接联系团队。</p>
     </div>
@@ -429,9 +438,10 @@ open http://&lt;host&gt;:8700</code></pre></div>
       <span class="ft-copy">© 2026 Simple-Dot Agent Studio</span>
       <span class="ft-priv" data-i18n="ft.privacy">本站仅在 localStorage 保存你的语言与主题偏好，不使用 cookie、不追踪。</span>
       <span class="ft-icp">沪ICP备17027014号-1</span>
-      <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">README</a>
-      <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">design.md</a>
-      <a href="https://github.com/feigbar-beep/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
+      <a href="https://www.simple-dot.com" rel="noopener" target="_blank" data-i18n-attr="aria-label:ft.site" aria-label="官网">www.simple-dot.com</a>
+      <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank" class="wordmark">README</a>
+      <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank">design.md</a>
+      <a href="https://github.com/feigbar-SimpleDot/simpledot-agent-studio" rel="noopener" target="_blank">GitHub ↗</a>
     </footer>
   </div>
 </section>
